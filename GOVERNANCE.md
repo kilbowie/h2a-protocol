@@ -1,0 +1,13 @@
+# Governance
+
+**Versioning (gate G4).** v0.x is a working draft; the wire format may change. **v1.0 freezes** the
+Grant, Attestation, Decision Record, and Status List formats. Post-v1.0 breaking changes require a
+major-version bump.
+
+**Licensing (gate G2).** Spec text is **CC BY 4.0**; schemas, reference code, scripts, and site are
+**Apache-2.0**. Add the canonical LICENSE files via GitHub's "Add file → license" picker — do not
+hand-paste legal text.
+
+**Decisions.** Recorded as ADRs under `spec/adr/` (ADR-001 … ADR-008).
+
+**Neutrality.** Public from day one; the stewarding Foundation is never in the runtime critical path.

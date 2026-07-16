@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://h2a-protocol.org/schemas/v0/h2a-memory.profile.schema.json",
+  "title": "H2A-Memory Profile",
+  "description": "Memory-record profile. Applies only when a grant lists 'h2a-memory'. Enforces the negative test: a DERIVED memory record MUST carry non-empty provenance, or it is rejected.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["h2a_version", "profile", "grant_id", "subject_ref", "record"],
+  "properties": {
+    "h2a_version": { "type": "string", "const": "0.1" },
+    "profile": { "type": "string", "const": "h2a-memory" },
+    "grant_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "subject_ref": { "type": "string", "pattern": "^urn:h2a:subject:[A-Za-z0-9._-]+$" },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_id", "memory_type", "content_hash"],
+      "properties": {
+        "record_id": { "type": "string" },
+        "memory_type": { "type": "string", "enum": ["raw", "derived"] },
+        "content_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sources"],
+      "properties": {
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source_ref", "method"],
+            "properties": {
+              "source_ref": { "type": "string" },
+              "method": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "retention_horizon": { "type": "string", "description": "ISO 8601 duration." },
+        "deletion_on_revoke": { "type": "boolean", "default": true }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "record": { "properties": { "memory_type": { "const": "derived" } } } } },
+      "then": { "required": ["provenance"] }
+    }
+  ]
+}

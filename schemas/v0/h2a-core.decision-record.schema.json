@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://h2a-protocol.org/schemas/v0/h2a-core.decision-record.schema.json",
+  "title": "H2A Core Decision Record",
+  "description": "The signed record of a conformant-vs-non-conformant transmission decision. First-class schema object (ADR-006): H2A evidences, it does not enforce. This is the most commercially significant artefact for union / CMO procurement leverage — a non-conformant downstream transmission is recorded here explicitly.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "h2a_version",
+    "record_id",
+    "grant_id",
+    "decision",
+    "created_at",
+    "alg",
+    "signature"
+  ],
+  "properties": {
+    "h2a_version": { "type": "string", "const": "0.1" },
+    "record_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "grant_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "PERMITTED_CONFORMANT",
+        "REFUSED_REVOKED",
+        "REFUSED_OUT_OF_SCOPE",
+        "REFUSED_LEASE_EXHAUSTED",
+        "TRANSMITTED_NON_CONFORMANT",
+        "ESCALATED"
+      ]
+    },
+    "reason_code": { "type": "string" },
+    "output_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "measured_latency_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Revocation-to-cutoff latency, measured at the issuer endpoint (not the operator), cross-checked against committed work."
+    },
+    "effective_chain_horizon": { "type": "string", "description": "Realised horizon of the chain = max of all links." },
+    "max_chain_horizon": { "type": "string" },
+    "non_conformant_transmission": {
+      "type": ["object", "null"],
+      "description": "Present and non-null ONLY when decision is TRANSMITTED_NON_CONFORMANT. Records a transmission that occurred outside conformance so it becomes admissible evidence.",
+      "additionalProperties": false,
+      "required": ["downstream_ref", "why"],
+      "properties": {
+        "downstream_ref": { "type": "string", "description": "Identifier of the downstream executor / channel that transmitted non-conformantly." },
+        "why": { "type": "string", "enum": ["horizon_exceeded", "downstream_not_conformant", "check_bypassed"] },
+        "horizon_exceeded_by_ms": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "witness": {
+      "type": "object",
+      "description": "External anchoring (ADR-005): RFC 3161 eIDAS-qualified TSA token + independent witness co-signature on the chain head. No blockchain.",
+      "additionalProperties": false,
+      "properties": {
+        "tsa_token_ref": { "type": "string" },
+        "witness_cosign_ref": { "type": "string" }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "alg": { "type": "string", "enum": ["ES256", "ES384", "EdDSA"], "default": "ES256" },
+    "signature": { "type": "string" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "decision": { "const": "TRANSMITTED_NON_CONFORMANT" } } },
+      "then": { "required": ["non_conformant_transmission"], "properties": { "non_conformant_transmission": { "type": "object" } } }
+    }
+  ]
+}

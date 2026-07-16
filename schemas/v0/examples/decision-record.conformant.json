@@ -1,0 +1,16 @@
+{
+  "h2a_version": "0.1",
+  "record_id": "9d1f2b30-2222-4b2a-9c33-8a1b2c3d4e5f",
+  "grant_id": "3f2a1c40-0d1e-4b2a-9c33-8a1b2c3d4e5f",
+  "decision": "PERMITTED_CONFORMANT",
+  "reason_code": "in-scope",
+  "output_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "measured_latency_ms": 0,
+  "effective_chain_horizon": "PT30M",
+  "max_chain_horizon": "PT1H",
+  "non_conformant_transmission": null,
+  "witness": { "tsa_token_ref": "tsa:rfc3161:abc", "witness_cosign_ref": "witness:hdicr:def" },
+  "created_at": "2026-07-20T14:03:01Z",
+  "alg": "ES256",
+  "signature": "BASE64URL_SIG"
+}

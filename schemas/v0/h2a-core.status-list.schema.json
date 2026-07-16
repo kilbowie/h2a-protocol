@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://h2a-protocol.org/schemas/v0/h2a-core.status-list.schema.json",
+  "title": "H2A Core Status List",
+  "description": "A static, signed revocation artefact served from the issuer's own endpoint (and optional CDN mirrors). Short-TTL and re-signed. The Foundation is never in this fetch path.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "h2a_version",
+    "status_list_id",
+    "iss",
+    "purpose",
+    "encoding",
+    "list",
+    "valid_from",
+    "valid_until",
+    "alg",
+    "signature"
+  ],
+  "properties": {
+    "h2a_version": { "type": "string", "const": "0.1" },
+    "status_list_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "iss": { "type": "string", "format": "uri", "description": "Issuer namespace — same root as the grants it covers." },
+    "purpose": { "type": "string", "const": "revocation" },
+    "encoding": { "type": "string", "const": "base64url-bitstring" },
+    "list": { "type": "string", "description": "base64url-encoded, gzip-compressed bitstring. Bit set = revoked." },
+    "mirrors": { "type": "array", "items": { "type": "string", "format": "uri" } },
+    "valid_from": { "type": "string", "format": "date-time" },
+    "valid_until": { "type": "string", "format": "date-time", "description": "Short TTL. A verifier treats an expired list as fail-closed." },
+    "alg": { "type": "string", "enum": ["ES256", "ES384", "EdDSA"], "default": "ES256" },
+    "signature": { "type": "string" }
+  }
+}

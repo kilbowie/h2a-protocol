@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://h2a-protocol.org/schemas/v0/h2a-core.grant.schema.json",
+  "title": "H2A Core Grant",
+  "description": "Authority for a grantee (operator) to use a subject within a bounded scope, revocable at point of use. Central H2A-Core object. iss MUST resolve under a rights-holder or fiduciary namespace, MUST NOT resolve under the operator's domain, and SHOULD NOT resolve under the implementer's (Bridle's) domain (ADR-001).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "h2a_version",
+    "grant_id",
+    "iss",
+    "subject_ref",
+    "grantee_ref",
+    "scope",
+    "status",
+    "revocation_horizon",
+    "alg",
+    "signatures",
+    "iat",
+    "exp"
+  ],
+  "properties": {
+    "h2a_version": { "type": "string", "const": "0.1" },
+    "grant_id": {
+      "type": "string",
+      "description": "Unique grant identifier; also serves as the jti for replay protection (ADR-004).",
+      "pattern": "^[0-9a-fA-F-]{36}$"
+    },
+    "iss": {
+      "type": "string",
+      "format": "uri",
+      "description": "Issuer identity URI under a rights-holder / fiduciary namespace. Not operator; not implementer."
+    },
+    "subject_ref": {
+      "type": "string",
+      "description": "Key-bound URN of the governed subject (digital actor / likeness / memory principal).",
+      "pattern": "^urn:h2a:subject:[A-Za-z0-9._-]+$"
+    },
+    "grantee_ref": {
+      "type": "string",
+      "description": "Authenticated operator identity the grant is issued to (ADR-004).",
+      "pattern": "^urn:h2a:grantee:[A-Za-z0-9._-]+$"
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purposes"],
+      "properties": {
+        "purposes": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "media_types": { "type": "array", "items": { "type": "string" } },
+        "territories": { "type": "array", "items": { "type": "string", "description": "ISO 3166-1 alpha-2 or 'GLOBAL'." } },
+        "channels": { "type": "array", "items": { "type": "string" } },
+        "exclusions": { "type": "array", "items": { "type": "string" }, "description": "Hard denials, e.g. political, adult, defamatory." }
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "description": "Which asset-bound profiles apply to this grant.",
+      "items": { "type": "string", "enum": ["h2a-media", "h2a-memory"] },
+      "uniqueItems": true
+    },
+    "lease": {
+      "type": "object",
+      "description": "Budget Authority — cross-provider spend cap enforced as a lease, not a counter.",
+      "additionalProperties": false,
+      "required": ["cap", "unit", "nbf", "exp"],
+      "properties": {
+        "cap": { "type": "number", "exclusiveMinimum": 0 },
+        "unit": { "type": "string", "description": "e.g. 'usd', 'render-seconds', 'tokens'." },
+        "provider_agnostic": { "type": "boolean", "default": true },
+        "nbf": { "type": "string", "format": "date-time" },
+        "exp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "index"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri", "description": "Primary status-list URI. MUST resolve under the issuer's own endpoint, never the Foundation's." },
+        "mirrors": { "type": "array", "items": { "type": "string", "format": "uri" }, "description": "Additional CDN mirror URIs of the same signed list." },
+        "index": { "type": "integer", "minimum": 0, "description": "This grant's bit position in the status list." }
+      }
+    },
+    "revocation_horizon": {
+      "type": "string",
+      "description": "Declared maximum time from revocation to non-conformant-transmission cutoff. The single conformance dial. ISO 8601 duration.",
+      "pattern": "^P(T)?([0-9]+[HMS])+$"
+    },
+    "delegation": {
+      "type": "object",
+      "description": "Attenuation-only delegation chain (ADR-004). A child grant may only narrow scope.",
+      "additionalProperties": false,
+      "required": ["depth"],
+      "properties": {
+        "parent": { "type": ["string", "null"], "description": "grant_id of the parent, or null at chain root." },
+        "depth": { "type": "integer", "minimum": 0 },
+        "effective_chain_horizon": { "type": "string", "description": "Realised horizon of the whole chain = max of all links (a chain is only as revocable as its slowest link)." },
+        "max_chain_horizon": { "type": "string", "description": "Ceiling the chain may not exceed." }
+      }
+    },
+    "alg": { "type": "string", "enum": ["ES256", "ES384", "EdDSA"], "default": "ES256", "description": "Signature algorithm. ES256 (P-256) is mandatory-to-implement; curve-agnostic via this header." },
+    "signatures": {
+      "type": "array",
+      "description": "Two detached signatures (ADR-004): consent (by subject/custodian) and issuance (by issuer). Kept separate so consent and issuance never collapse into one act.",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "kid", "value"],
+        "properties": {
+          "role": { "type": "string", "enum": ["consent", "issuance"] },
+          "kid": { "type": "string" },
+          "value": { "type": "string", "description": "base64url detached signature over the canonicalised grant." }
+        }
+      }
+    },
+    "iat": { "type": "string", "format": "date-time" },
+    "nbf": { "type": "string", "format": "date-time" },
+    "exp": { "type": "string", "format": "date-time" }
+  }
+}

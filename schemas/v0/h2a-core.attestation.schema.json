@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://h2a-protocol.org/schemas/v0/h2a-core.attestation.schema.json",
+  "title": "H2A Core Attestation",
+  "description": "Signed receipt of a single act of use, binding the committed output to the grant and to the point-of-use status check that authorised it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "h2a_version",
+    "attestation_id",
+    "grant_id",
+    "subject_ref",
+    "grantee_ref",
+    "output_hash",
+    "status_check",
+    "alg",
+    "signature",
+    "created_at"
+  ],
+  "properties": {
+    "h2a_version": { "type": "string", "const": "0.1" },
+    "attestation_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "grant_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "subject_ref": { "type": "string", "pattern": "^urn:h2a:subject:[A-Za-z0-9._-]+$" },
+    "grantee_ref": { "type": "string", "pattern": "^urn:h2a:grantee:[A-Za-z0-9._-]+$" },
+    "output_hash": {
+      "type": "string",
+      "description": "SHA-256 of the committed output.",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "generator": {
+      "type": "object",
+      "description": "What produced the output. TI governs, never generates — generation is outsourced (e.g. Synthesia/HeyGen) via the Bridle adapter.",
+      "additionalProperties": false,
+      "properties": {
+        "adapter": { "type": "string" },
+        "provider": { "type": "string" },
+        "model": { "type": "string" }
+      }
+    },
+    "status_check": {
+      "type": "object",
+      "description": "The check performed at the point of use. Never cached; always live.",
+      "additionalProperties": false,
+      "required": ["result", "checked_at"],
+      "properties": {
+        "result": { "type": "string", "enum": ["valid", "refused"] },
+        "reason_code": { "type": "string", "description": "e.g. asset-revoked, out-of-scope, lease-exhausted." },
+        "checked_at": { "type": "string", "format": "date-time" },
+        "status_uri": { "type": "string", "format": "uri" },
+        "witness_beacon": { "type": "string", "description": "Reference to the external timestamp/beacon the check was bracketed against (ADR-005)." }
+      }
+    },
+    "alg": { "type": "string", "enum": ["ES256", "ES384", "EdDSA"], "default": "ES256" },
+    "signature": { "type": "string", "description": "base64url signature over the canonicalised attestation." },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}
