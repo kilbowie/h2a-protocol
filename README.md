@@ -16,7 +16,11 @@ reference/       runnable reference verifier (h2a_ref) — the executable spec
 scripts/         validate-schemas.py, check-reference.py (CI gates)
 site/            static site generator -> h2a-protocol.org (build.py, content/, CNAME)
 .github/         Pages workflow: validate -> check reference -> build -> deploy
+CHANGELOG.md     notable changes, published at h2a-protocol.org/changelog
 ```
+
+**Changelog.** Every notable change adds a dated entry at the top of `CHANGELOG.md` (published at
+`/changelog`) — this is how the working draft's history is tracked before v1.0 (see GOVERNANCE.md, G4).
 
 ## Build & verify
 ```bash
