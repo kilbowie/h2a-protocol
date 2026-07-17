@@ -6,6 +6,10 @@
   "description": "Reference issuer/status service — the revocation authority. Represents the fiduciary trust domain.",
   "main": "src/service.ts",
   "engines": { "node": ">=18" },
-  "scripts": { "start": "tsx src/service.ts" },
-  "devDependencies": { "tsx": "^4.19.2", "@types/node": "^22.9.0" }
+  "scripts": {
+    "start": "tsx src/service.ts",
+    "typecheck": "tsc --noEmit",
+    "emit-interop": "tsx src/interop-emit.ts"
+  },
+  "devDependencies": { "tsx": "^4.19.2", "typescript": "^5.6.3", "@types/node": "^22.9.0" }
 }

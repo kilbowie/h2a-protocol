@@ -1,0 +1,11 @@
+# Normalize all text to LF in the repo and on checkout, on every platform.
+# The site deploys on Linux and the schemas are signed byte-for-byte, so line
+# endings must not depend on who committed. This also silences the Windows
+# "LF will be replaced by CRLF" warnings.
+* text=auto eol=lf
+
+# Signatures are computed over exact bytes — never let these be munged.
+*.json  text eol=lf
+*.woff2 binary
+*.png   binary
+*.ico   binary

@@ -29,3 +29,8 @@ status-list signing key (ADR-009), so the reference is split across two trust do
 
 `python scripts/check-reference.py` (from the repo root) enforces that: it validates every artefact
 the reference emits against the schemas, and asserts a list signed by the wrong key is refused.
+
+Because the authority is one key and not one language, `scripts/check-interop.py` closes the loop
+across the boundary: the TypeScript issuer signs a list (`npm --prefix reference/issuer-service run
+emit-interop`), and the Python verifier confirms that signature, reads the revoked bit, and reaches
+the right decision. If the two `canonical()` implementations ever drift, that gate fails.
