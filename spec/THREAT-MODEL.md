@@ -1,5 +1,7 @@
 # H2A Threat Model — v0.2 (working draft)
 
+[TOC]
+
 ## Self-serving record
 A Decision Record signed only by the party it exonerates is weak. Two attacks cannot be caught from
 the record alone:

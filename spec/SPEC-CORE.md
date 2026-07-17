@@ -4,6 +4,8 @@
 > Decision Record, and Status List formats (see GOVERNANCE.md, gate G4). Do not present H2A as a
 > ratified standard while this banner stands.
 
+[TOC]
+
 H2A is a neutral, open standard for the **consent, attestation, and revocation** of AI-generated
 likeness (H2A-Media) and AI memory (H2A-Memory). H2A **evidences; it does not enforce** (ADR-006):
 it produces a signed account of whether each act of use was conformant, and records non-conformant

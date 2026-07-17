@@ -1,17 +1,14 @@
 # Schemas
 
-All schemas are JSON Schema Draft 2020-12. `$id`s resolve under `https://h2a-protocol.org/schemas/v0/`.
+The six H2A schemas are **JSON Schema Draft 2020-12**. Every `$id` resolves under
+`https://h2a-protocol.org/schemas/v0/`, so a validator can fetch them directly. Each object below
+lists its fields — type, whether it is required, and what it means — followed by a real example
+taken straight from the repository.
 
-## Core
-- [`h2a-core.grant`](schemas/v0/h2a-core.grant.schema.json)
-- [`h2a-core.attestation`](schemas/v0/h2a-core.attestation.schema.json)
-- [`h2a-core.decision-record`](schemas/v0/h2a-core.decision-record.schema.json)
-- [`h2a-core.status-list`](schemas/v0/h2a-core.status-list.schema.json)
+Every example shown is **checked in CI** by [`scripts/validate-schemas.py`](https://github.com/kilbowie/h2a-protocol/blob/main/scripts/validate-schemas.py):
+the validated ones must pass their schema, and the two counter-examples
+(`decision-record.INVALID`, `memory.derived.INVALID`) must be rejected. The tables and examples on
+this page are generated from the schema files at build time, so they cannot drift from the schemas
+they describe.
 
-## Profiles
-- [`h2a-media.profile`](schemas/v0/h2a-media.profile.schema.json)
-- [`h2a-memory.profile`](schemas/v0/h2a-memory.profile.schema.json)
-
-Every schema ships positive and negative examples under `schemas/v0/examples/`. The negative tests
-(`memory.derived.INVALID`, `decision-record.INVALID`) are enforced in CI by
-`scripts/validate-schemas.py`.
+<!--SCHEMA-REFERENCE-->
