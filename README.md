@@ -4,25 +4,27 @@ A neutral, open standard for the **consent, attestation, and revocation** of AI-
 (H2A-Media) and AI memory (H2A-Memory). H2A **evidences; it does not enforce** — it produces a
 signed, externally-anchored record of whether each act of use was conformant.
 
-> **Working draft (v0.1).** The wire format may change before v1.0. Not yet a ratified standard.
+> **Working draft (v0.x).** The wire format may change before v1.0. Not yet a ratified standard.
 
 ## Layout
 ```
 spec/            SPEC-CORE, SPEC-MEDIA, SPEC-MEMORY, CONFORMANCE, THREAT-MODEL
-spec/adr/        ADR-001 … ADR-008 (locked decisions)
+spec/adr/        ADR-001 … ADR-009 (locked decisions)
 schemas/v0/      6 JSON Schemas (Draft 2020-12) + examples/ (positive + negative)
 reference/       runnable reference verifier (h2a_ref) — the executable spec
-scripts/         validate-schemas.py (CI gate)
+  issuer-service/  reference issuer / status service — the revocation authority (ADR-009)
+scripts/         validate-schemas.py, check-reference.py (CI gates)
 site/            static site generator -> h2a-protocol.org (build.py, content/, CNAME)
-.github/         Pages workflow: validate -> build -> deploy
+.github/         Pages workflow: validate -> check reference -> build -> deploy
 ```
 
 ## Build & verify
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt -r reference/requirements.txt
 python scripts/validate-schemas.py         # schemas + positive/negative examples (CI gate)
+python scripts/check-reference.py          # the running reference vs the schemas (CI gate)
 python site/build.py                       # -> site/_out
-( cd reference && pip install -r requirements.txt && python -m h2a_ref.demo )
+( cd reference && python -m h2a_ref.demo )
 ```
 
 ## Standing it up

@@ -19,7 +19,8 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import hashes
 
-from h2a_ref.verify import Use, bitstring_encode, signing_bytes, verify
+from h2a_ref.issue import make_status_list
+from h2a_ref.verify import Use, signing_bytes, verify
 
 
 def _sign(priv, payload: bytes) -> str:
@@ -33,6 +34,7 @@ def main() -> None:
 
     subject_priv = ec.generate_private_key(ec.SECP256R1())
     issuer_priv = ec.generate_private_key(ec.SECP256R1())
+    status_priv = ec.generate_private_key(ec.SECP256R1())  # the issuer's status-list signing key
 
     grant = {
         "h2a_version": "0.1",
@@ -67,25 +69,23 @@ def main() -> None:
     issuer_keys = {"issuer-key-1": issuer_priv.public_key()}
     consent_keys = {"subject-key-1": subject_priv.public_key()}
 
-    def status(revoked):
-        return {"list": bitstring_encode(set(revoked)),
-                "valid_until": iso(now + timedelta(minutes=30))}
-
-    live = status([])            # nothing revoked
-    revoked = status([42])       # this grant's index revoked
+    # the issuer signs the list — the only component that can revoke (ADR-009)
+    status_pubkey = status_priv.public_key()
+    live = make_status_list(status_priv, set(), grant["iss"], now)       # nothing revoked
+    revoked = make_status_list(status_priv, {42}, grant["iss"], now)     # this grant revoked
 
     print("=== 1. in-scope, live ===")
-    r = verify(grant, issuer_keys, consent_keys, live,
+    r = verify(grant, issuer_keys, consent_keys, live, status_pubkey,
                Use("promotional-video", "GB", 100))
     print(json.dumps({"decision": r["decision"], "reason": r["reason_code"]}, indent=2))
 
     print("\n=== 2. out-of-scope purpose ===")
-    r = verify(grant, issuer_keys, consent_keys, live,
+    r = verify(grant, issuer_keys, consent_keys, live, status_pubkey,
                Use("political-ad", "GB", 100))
     print(json.dumps({"decision": r["decision"], "reason": r["reason_code"]}, indent=2))
 
     print("\n=== 3. after revocation ===")
-    r = verify(grant, issuer_keys, consent_keys, revoked,
+    r = verify(grant, issuer_keys, consent_keys, revoked, status_pubkey,
                Use("promotional-video", "GB", 100))
     print(json.dumps({"decision": r["decision"], "reason": r["reason_code"]}, indent=2))
 

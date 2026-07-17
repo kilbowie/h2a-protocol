@@ -1,0 +1,11 @@
+{
+  "name": "@h2a/issuer-service-ref",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reference issuer/status service — the revocation authority. Represents the fiduciary trust domain.",
+  "main": "src/service.ts",
+  "engines": { "node": ">=18" },
+  "scripts": { "start": "tsx src/service.ts" },
+  "devDependencies": { "tsx": "^4.19.2", "@types/node": "^22.9.0" }
+}

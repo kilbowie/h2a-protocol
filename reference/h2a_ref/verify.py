@@ -53,6 +53,13 @@ def bitstring_encode(revoked: set[int], size: int = 1024) -> str:
     return base64.urlsafe_b64encode(gzip.compress(bytes(ba))).decode().rstrip("=")
 
 
+def verify_status_sig(pub, status_list: dict) -> bool:
+    """Verify the status list signature over everything except the signature field."""
+    sl = {k: v for k, v in status_list.items() if k != "signature"}
+    payload = canonical(sl)
+    return verify_sig(pub, payload, status_list.get("signature", ""))
+
+
 def bit_is_revoked(list_b64u: str, index: int) -> bool:
     raw = gzip.decompress(base64.urlsafe_b64decode(list_b64u + "=="))
     byte = index // 8
@@ -96,8 +103,13 @@ def _record(grant_id: str, decision: str, reason: str, extra: dict | None = None
 
 
 def verify(grant: dict, issuer_keys: dict, consent_keys: dict,
-           status_list: dict, use: Use) -> dict:
-    """Return a decision record. issuer_keys/consent_keys map kid -> public key."""
+           status_list: dict, status_pubkey: ec.EllipticCurvePublicKey, use: Use) -> dict:
+    """Return a decision record. issuer_keys/consent_keys map kid -> public key.
+
+    status_pubkey is the issuer's status-list key and is required: a verifier with no
+    trust anchor cannot check the list, and SPEC-CORE §4.3 has no path that permits an
+    unverified one (ADR-009).
+    """
     gid = grant.get("grant_id", "unknown")
 
     # 1. signatures — both consent and issuance must verify
@@ -117,7 +129,10 @@ def verify(grant: dict, issuer_keys: dict, consent_keys: dict,
     if now < _dt(grant["nbf"]) or now > _dt(grant["exp"]):
         return _record(gid, "REFUSED_OUT_OF_SCOPE", "grant-outside-validity-window")
 
-    # 3. status list — fail-closed if the list itself is stale
+    # 3. status list — fetch-and-verify only (ADR-009). Fail closed on an unsigned,
+    #    wrongly-signed, or stale list; the verifier never revokes and serves no list.
+    if not status_list.get("signature") or not verify_status_sig(status_pubkey, status_list):
+        return _record(gid, "REFUSED_REVOKED", "status-signature-invalid-fail-closed")
     if now > _dt(status_list["valid_until"]):
         return _record(gid, "REFUSED_REVOKED", "status-list-stale-fail-closed")
     if bit_is_revoked(status_list["list"], grant["status"]["index"]):

@@ -13,6 +13,13 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "site" / "_out"
 CONTENT = ROOT / "site" / "content"
 SPEC = ROOT / "spec"
+ADR = SPEC / "adr"
+
+
+def adr_slug(path: Path) -> str:
+    """ADR-009-revocation-authority.md -> adr-009.html — the name the specs cite."""
+    return f"adr-{path.stem.split('-')[1]}.html"
+
 
 # (source markdown, output path, nav title)  — nav title "" means not in top nav
 PAGES = [
@@ -24,8 +31,12 @@ PAGES = [
     (SPEC / "CONFORMANCE.md", "conformance.html", "Conformance"),
     (SPEC / "THREAT-MODEL.md", "threat-model.html", ""),
     (CONTENT / "schemas.md", "schemas.html", "Schemas"),
+    (CONTENT / "decisions.md", "decisions.html", "Decisions"),
     (CONTENT / "governance.md", "governance.html", "Governance"),
 ]
+
+# ADRs publish by convention, not by hand — a new ADR-0NN appears on the site by existing.
+PAGES += [(p, adr_slug(p), "") for p in sorted(ADR.glob("ADR-*.md"))]
 
 BANNER = ('<div class="banner">Working draft — the v0.x wire format may change. '
           'H2A is not yet a ratified standard.</div>')

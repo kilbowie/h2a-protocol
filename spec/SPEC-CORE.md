@@ -1,4 +1,4 @@
-# H2A Core Specification — v0.1 (working draft)
+# H2A Core Specification — v0.2 (working draft)
 
 > **Working draft.** The v0.x wire format may change. v1.0 will freeze the Grant, Attestation,
 > Decision Record, and Status List formats (see GOVERNANCE.md, gate G4). Do not present H2A as a
@@ -48,9 +48,11 @@ A conformant verifier **MUST** perform, in order, failing closed at the first fa
 1. **Signatures.** Verify `consent` and `issuance` over the canonical Grant (all fields except the
    signature values). Either missing or invalid → refuse.
 2. **Validity window.** `nbf ≤ now ≤ exp`, else refuse.
-3. **Status.** Fetch `status.uri` (or any `status.mirrors` entry). If the list is expired
-   (`now > valid_until`) the verifier **MUST** fail closed. If the Grant's `status.index` bit is
-   set → `REFUSED_REVOKED`.
+3. **Status.** Fetch `status.uri` (or any `status.mirrors` entry). The verifier **MUST** verify the
+   status list's signature against the issuer's public key and **MUST** fail closed if the list is
+   unreachable, unsigned, wrongly signed, or expired (`now > valid_until`). If the Grant's
+   `status.index` bit is set → `REFUSED_REVOKED`. The verifier is **fetch-and-verify only**: it is
+   never the revocation authority and serves no status list of its own (ADR-009).
 4. **Scope.** The requested purpose **MUST** be in `scope.purposes`, **MUST NOT** be in
    `scope.exclusions`; territory **MUST** be permitted (or `GLOBAL`).
 5. **Lease.** If present, `now` within the lease window and cumulative spend ≤ `cap`.
@@ -64,6 +66,11 @@ A check **MUST** be performed at the point of use and **MUST NOT** be cached. A 
 only for the act it was issued against. Revocation takes effect at the next check; the declared
 `revocation_horizon` is the single conformance dial bounding the window from revocation to the
 non-conformant-transmission cutoff.
+
+**Revocation authority (ADR-009).** Revocation is exercised by the issuer / fiduciary, as custody of
+the status-list signing key: to revoke is to set the bit, re-sign, and publish. An implementer only
+fetches and verifies that signed list. An implementer **MUST NOT** expose a revoke capability or sign
+a status list; if it could, it would be the revocation authority regardless of intent.
 
 ## 6. Evidence, not enforcement (ADR-006)
 

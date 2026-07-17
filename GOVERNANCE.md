@@ -8,6 +8,7 @@ major-version bump.
 **Apache-2.0**. Add the canonical LICENSE files via GitHub's "Add file → license" picker — do not
 hand-paste legal text.
 
-**Decisions.** Recorded as ADRs under `spec/adr/` (ADR-001 … ADR-008).
+**Decisions.** Recorded as ADRs under `spec/adr/` (ADR-001 … ADR-009), published at
+[h2a-protocol.org/decisions.html](https://h2a-protocol.org/decisions.html).
 
 **Neutrality.** Public from day one; the stewarding Foundation is never in the runtime critical path.
