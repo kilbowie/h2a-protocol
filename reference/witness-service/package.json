@@ -1,0 +1,14 @@
+{
+  "name": "@h2a/witness-service-ref",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reference independent witness service (ADR-005). Co-signs an implementer's audit-chain head from its own trust domain, so the record does not rest on the recording party's word alone.",
+  "main": "src/service.ts",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "tsx src/service.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": { "tsx": "^4.19.2", "typescript": "^5.6.3", "@types/node": "^22.9.0" }
+}

@@ -17,3 +17,22 @@ critical path**.
 ## Consequences
 - Provides an external timestamp the recording party cannot forge.
 - **Action:** select an eIDAS-qualified TSA.
+
+## Implementation status (2026-07-18 — landed in code)
+The anchoring shape is implemented end-to-end and checked by the standalone verifier:
+- **Anchor object.** An implementer anchors its audit-chain **head** — `{ seq, head_hash, timestamp,
+  witness }` — where `timestamp` (RFC-3161-shaped) and `witness` each carry a singular `signature` over
+  `canonical(object − signature)`, the same convention as every other H2A object, so the verifier checks
+  them with no implementer code.
+- **Independent witness.** A reference **witness-service** (`reference/witness-service/`) co-signs the
+  head from its own trust domain (`POST /cosign`), separate from the issuer and the implementer.
+- **Verifier.** `anchoring.eidas_timestamp` and `anchoring.witness_cosignature` are now real checks;
+  an anchored, honest bundle reaches **L3**, a forged timestamp is caught and drops to L2, and an
+  unpinned TSA/witness is untrusted (`reference/verifier/src/selftest.ts` cases 6–8).
+- **Interim vs qualified.** The reference TSA is **NOT eIDAS-qualified** (`qualified:false`); it proves
+  the seam offline. A real qualified RFC-3161 TSA drops in behind the same seam and is pinned
+  `qualified:true`. The v0 witness is founder-operated; a **fiduciary-operated** witness takes custody
+  later — an ownership change, not an on-wire one. Binding a *specific record* to the anchored head via
+  an inclusion proof (rather than head-level) is a documented follow-on.
+- **Off the critical path.** Anchoring runs from a scheduled job over the current head, never inside a
+  check (Bridle: `POST /v0/anchor` / `npm run anchor:run`).

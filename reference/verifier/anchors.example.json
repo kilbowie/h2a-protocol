@@ -17,5 +17,18 @@
       "public_key_pem": "-----BEGIN PUBLIC KEY-----\n<Bridle evidence-signing key — the party being checked>\n-----END PUBLIC KEY-----\n",
       "endpoint": "https://api.kilbowieconsulting.com/v0/pubkey"
     }
+  },
+  "_comment_l3": "L3 anchoring (ADR-005). Pinned by the authority/witness names carried in an anchor (GET /v0/anchor-keys). `qualified:true` asserts the TSA certificate is eIDAS-qualified — the interim reference TSA is NOT qualified, so it is pinned qualified:false and reaches L3-interim only.",
+  "timestamp_authorities": {
+    "urn:h2a:tsa:reference": {
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\n<TSA key — a real eIDAS-qualified TSA cert in production>\n-----END PUBLIC KEY-----\n",
+      "qualified": false
+    }
+  },
+  "witnesses": {
+    "urn:h2a:witness:reference": {
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\n<independent witness key>\n-----END PUBLIC KEY-----\n",
+      "custodian": "founder-operated (interim) — moves to a fiduciary-operated witness; see ADR-005"
+    }
   }
 }

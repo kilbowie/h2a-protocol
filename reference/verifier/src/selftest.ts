@@ -79,10 +79,27 @@ function makeRecord(decision: string, reason: string) {
   return rec;
 }
 
+const tsa = kp(), witnessKp = kp();
+const TSA_ID = "urn:h2a:tsa:reference";
+const WITNESS_ID = "urn:h2a:witness:reference";
+
+// A reference anchor over a head hash (ADR-005 / L3). `forgeTimestamp` tampers with the token AFTER it
+// is signed, to prove a forged external timestamp is caught.
+function makeAnchor(headHash: string, seq: number, opts: { forgeTimestamp?: boolean } = {}) {
+  const timestamp: Record<string, unknown> = { authority: TSA_ID, hashed: headHash, time: iso(now), alg: "ES256", qualified: false, signature: "" };
+  timestamp.signature = signObject(tsa.priv, timestamp);
+  if (opts.forgeTimestamp) timestamp.time = iso(new Date(now.getTime() - 365 * 864e5)); // backdate after signing → sig breaks
+  const witness: Record<string, unknown> = { witness: WITNESS_ID, hashed: headHash, seq, cosigned_at: iso(now), alg: "ES256", signature: "" };
+  witness.signature = signObject(witnessKp.priv, witness);
+  return { seq, head_hash: headHash, timestamp, witness, anchored_at: iso(now) };
+}
+
 const anchors: Anchors = {
   issuers: { [ISS]: { public_key_pem: issuer.pub } },
   subjects: { [SUBJECT_REF]: { public_key_pem: subject.pub } },
   implementers: { bridle: { public_key_pem: bridle.pub } },
+  timestamp_authorities: { [TSA_ID]: { public_key_pem: tsa.pub, qualified: false } },
+  witnesses: { [WITNESS_ID]: { public_key_pem: witnessKp.pub } },
 };
 const use = { purpose: "promotional-video", territory: "GB", spend: 100 };
 
@@ -131,5 +148,36 @@ console.log("5. issuer not in the pinned anchor set");
   check(r.checks.some((c) => c.id === "grant.issuance_signature" && c.status === "fail"), "issuance signature fails (no anchor)");
 }
 
+console.log("6. honest ANCHORED bundle (external timestamp + independent witness) → L3");
+{
+  const HEAD = "a".repeat(64);
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "bridle", anchor: makeAnchor(HEAD, 7) as any };
+  const r = verifyBundle(b, anchors, now);
+  check(r.ok, "verifies as honest");
+  check(r.conformance_observed === "L3", "conformance observed = L3");
+  check(r.checks.some((c) => c.id === "anchoring.eidas_timestamp" && c.status === "pass"), "external timestamp verifies");
+  check(r.checks.some((c) => c.id === "anchoring.witness_cosignature" && c.status === "pass"), "independent witness co-signature verifies");
+}
+
+console.log("7. FORGED external timestamp (backdated after signing) — must be caught, drops to L2");
+{
+  const HEAD = "b".repeat(64);
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "bridle", anchor: makeAnchor(HEAD, 8, { forgeTimestamp: true }) as any };
+  const r = verifyBundle(b, anchors, now);
+  check(!r.ok, "NOT verified — the forged timestamp is caught");
+  check(r.checks.some((c) => c.id === "anchoring.eidas_timestamp" && c.status === "fail"), "timestamp check fails");
+  check(r.conformance_observed === "L2", "falls back to L2 — L1+L2 evidence still holds");
+}
+
+console.log("8. anchor from an UNPINNED timestamp authority — untrusted");
+{
+  const HEAD = "c".repeat(64);
+  const noTsa: Anchors = { ...anchors, timestamp_authorities: {} };
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "bridle", anchor: makeAnchor(HEAD, 9) as any };
+  const r = verifyBundle(b, noTsa, now);
+  check(!r.ok, "NOT verified — unpinned TSA is untrusted");
+  check(r.checks.some((c) => c.id === "anchoring.eidas_timestamp" && c.status === "fail"), "timestamp check fails (no anchor)");
+}
+
 if (failures > 0) { console.error(`\nSELFTEST FAIL: ${failures} check(s) failed`); process.exit(1); }
-console.log("\nSELFTEST PASS — the verifier agrees with honest evidence and catches a lying implementer.");
+console.log("\nSELFTEST PASS — the verifier agrees with honest evidence, catches a lying implementer, and checks L3 anchoring.");

@@ -16,6 +16,10 @@ export interface Anchors {
   subjects: Record<string, { public_key_pem: string }>;
   // Keyed by implementer name; the party being CHECKED. Its key is pinned so it cannot swap keys.
   implementers: Record<string, { public_key_pem: string; endpoint?: string }>;
+  // L3 anchoring (ADR-005). Keyed by the authority/witness names carried in an anchor. Pinning a TSA as
+  // `qualified` records that its certificate is eIDAS-qualified — an interim reference TSA is not.
+  timestamp_authorities?: Record<string, { public_key_pem: string; qualified?: boolean }>;
+  witnesses?: Record<string, { public_key_pem: string; custodian?: string }>;
 }
 
 interface Grant {
@@ -30,12 +34,24 @@ interface Grant {
   exp: string;
 }
 
+// An external anchor of the implementer's audit head (ADR-005 / L3). Both the timestamp token and the
+// witness co-signature carry a singular `signature` over canonical(object minus signature) — the same
+// convention as every other H2A object — so verifyObject checks them with no implementer code.
+export interface Anchor {
+  seq: number;
+  head_hash: string;
+  timestamp: { authority: string; hashed: string; time: string; alg: string; qualified: boolean; signature: string };
+  witness: { witness: string; hashed: string; seq: number; cosigned_at: string; alg: string; signature: string };
+  anchored_at?: string;
+}
+
 export interface Bundle {
   grant: Grant;
   use: { purpose: string; territory: string; spend?: number };
   decision_record: Record<string, unknown>;
   status_list: Record<string, unknown>;
   attestation?: Record<string, unknown>;
+  anchor?: Anchor; // L3 — an external timestamp + independent witness co-signature over the audit head
   implementer?: string; // name into anchors.implementers; if absent, every implementer key is tried
 }
 
@@ -48,7 +64,7 @@ export interface Check {
 }
 export interface Report {
   ok: boolean; // no evaluated check failed — the record is an HONEST reflection of the evidence
-  conformance_observed: "none" | "L1" | "L2";
+  conformance_observed: "none" | "L1" | "L2" | "L3";
   rederived: { decision: string; reason: string };
   record: { decision: string; reason: string };
   implementer_key: string | null; // which pinned implementer key verified the record, if any
@@ -165,14 +181,45 @@ export function verifyBundle(bundle: Bundle, anchors: Anchors, now = new Date())
   add("decision.consistency", "L1", consistent ? "pass" : "fail",
     consistent ? `independent re-derivation agrees: ${rd.decision}` : `record claims ${recDecision} but independent re-derivation gives ${rd.decision}`);
 
-  // --- L3: not evaluated (no external anchoring in the bundle) ---
-  add("anchoring.eidas_timestamp", "L3", "not_evaluated", "no eIDAS-qualified timestamp in bundle (Sprint: L3)");
-  add("anchoring.witness_cosignature", "L3", "not_evaluated", "no independent witness co-signature in bundle (Sprint: L3)");
+  // --- L3: external anchoring of the audit head (ADR-005) — an external timestamp Bridle cannot forge
+  // plus an independent witness co-signature. When no anchor is in the bundle, L3 is not evaluated (the
+  // bundle is at most L2). Note: this verifies the ANCHOR is valid and internally consistent; binding a
+  // specific record to the anchored head via an inclusion proof is a documented follow-on. ---
+  const anchor = bundle.anchor;
+  if (!anchor) {
+    add("anchoring.eidas_timestamp", "L3", "not_evaluated", "no anchor in bundle — evidence is at most L2");
+    add("anchoring.witness_cosignature", "L3", "not_evaluated", "no anchor in bundle — evidence is at most L2");
+  } else {
+    const tsa = anchors.timestamp_authorities?.[anchor.timestamp.authority];
+    const tsHashOk = anchor.timestamp.hashed === anchor.head_hash;
+    if (!tsa) add("anchoring.eidas_timestamp", "L3", "fail", `no pinned anchor for timestamp authority ${anchor.timestamp.authority}`);
+    else {
+      const sigOk = verifyObject(tsa.public_key_pem, anchor.timestamp as unknown as Record<string, unknown>);
+      const qual = tsa.qualified && anchor.timestamp.qualified;
+      add("anchoring.eidas_timestamp", "L3", sigOk && tsHashOk ? "pass" : "fail",
+        sigOk && tsHashOk
+          ? `timestamp verifies against pinned TSA "${anchor.timestamp.authority}" (${qual ? "eIDAS-qualified" : "NON-qualified / interim reference"}); head ${anchor.head_hash.slice(0, 12)}… stamped at ${anchor.timestamp.time}`
+          : !sigOk ? "timestamp signature does not verify against the pinned TSA key" : "timestamp `hashed` != anchored head_hash");
+    }
+
+    const wit = anchors.witnesses?.[anchor.witness.witness];
+    const wHashOk = anchor.witness.hashed === anchor.head_hash && anchor.witness.seq === anchor.seq;
+    if (!wit) add("anchoring.witness_cosignature", "L3", "fail", `no pinned anchor for witness ${anchor.witness.witness}`);
+    else {
+      const sigOk = verifyObject(wit.public_key_pem, anchor.witness as unknown as Record<string, unknown>);
+      add("anchoring.witness_cosignature", "L3", sigOk && wHashOk ? "pass" : "fail",
+        sigOk && wHashOk
+          ? `independent witness "${anchor.witness.witness}" co-signed head ${anchor.head_hash.slice(0, 12)}… at seq ${anchor.seq}`
+          : !sigOk ? "witness co-signature does not verify against the pinned witness key" : "witness `hashed`/`seq` != anchored head");
+    }
+  }
 
   const failed = (level: Check["level"]) => checks.some((c) => c.level === level && c.status === "fail");
+  const evaluated = (level: Check["level"]) => checks.some((c) => c.level === level && c.status !== "not_evaluated");
   const l1ok = !failed("L1");
   const l2ok = !failed("L2");
-  const conformance_observed = l1ok && l2ok ? "L2" : l1ok ? "L1" : "none";
+  const l3ok = evaluated("L3") && !failed("L3");
+  const conformance_observed = l1ok && l2ok && l3ok ? "L3" : l1ok && l2ok ? "L2" : l1ok ? "L1" : "none";
 
   return {
     ok: !checks.some((c) => c.status === "fail"),
