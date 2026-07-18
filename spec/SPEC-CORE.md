@@ -39,9 +39,13 @@ custodian) and `issuance` (issuer). A verifier **MUST** validate both. `grant_id
 unique and serves as the replay-protection `jti`. `grantee_ref` **MUST** be an authenticated
 operator identity.
 
+<!--DIAGRAM:two-signatures-->
+
 Delegation is **attenuation-only**: a child Grant **MUST NOT** widen scope, extend the validity
 window, or raise the lease cap beyond its parent. The **effective chain horizon is the maximum over
 all links** — a chain is only as revocable as its slowest link.
+
+<!--DIAGRAM:delegation-chain-->
 
 ## 4. Verification algorithm (normative)
 
@@ -86,6 +90,8 @@ signed, externally-anchored account a counterparty relies on.
 Decision Records **SHOULD** be anchored with an RFC 3161 (eIDAS-qualified) timestamp and an
 independent witness co-signature on the chain head. Anchoring **MUST** stay off the runtime
 critical path. No distributed-ledger / blockchain anchoring is used.
+
+<!--DIAGRAM:anchoring-pipeline-->
 
 ## 8. Cryptography (ADR-008)
 

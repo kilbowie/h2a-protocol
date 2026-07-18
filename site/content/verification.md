@@ -3,6 +3,8 @@
 A conformant verifier runs the same sequence everywhere, failing closed at the first failure. It is
 operator-independent by design — nothing in it is specific to who runs it.
 
+<!--DIAGRAM:verification-flow-->
+
 1. **Signatures.** Verify the two detached signatures — *consent* (subject / custodian) and
    *issuance* (issuer) — over the canonical Grant.
 2. **Validity window.** The Grant must be within `nbf`…`exp`.

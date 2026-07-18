@@ -12,6 +12,8 @@ Conformance is honest by construction: a level claims only what it can prove.
 - **L3 — Anchored.** L2 plus external anchoring (ADR-005): eIDAS-qualified TSA timestamps and an
   independent witness co-signature. L3 is the level an underwriter can rely on.
 
+<!--DIAGRAM:conformance-ladder-->
+
 ## Test suite
 `scripts/validate-schemas.py` gates schema + example conformance (positive and negative) and runs in
 CI before every deploy. `reference/` provides the executable verification algorithm and the

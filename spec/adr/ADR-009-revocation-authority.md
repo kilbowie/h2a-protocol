@@ -20,6 +20,8 @@ status-list signing key**:
 - Consequently the status-list **signature is real from v0** (ES256), even while grant signatures
   remain stubbed until Sprint 1 — because this signature is what makes the authority split provable.
 
+<!--DIAGRAM:trust-domains-->
+
 ## Consequences
 - The implementer can make a falsifiable claim: "we have no revoke capability — here is the code —
   the only way a use is refused is that we read the fiduciary's signed list."

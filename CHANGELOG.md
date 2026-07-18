@@ -5,6 +5,21 @@ draft**, so entries are dated rather than version-tagged; per-document versions 
 are noted where they change. New changes go at the **top**, under the current date. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com).
 
+## 2026-07-18
+
+### Site
+- **Architecture & process-flow diagrams.** The protocol's key flows are now shown visually, not just
+  in prose: the five-gate verification algorithm (fail-closed, with the reason code each gate emits),
+  the four-object relationship map, the issuer-vs-implementer revocation key-custody split (ADR-009),
+  the L1→L2→L3 conformance ladder, the two-signature grant, delegation attenuation, and the
+  evidence/anchoring pipeline. Diagrams are generated at build time as themed inline HTML (`site/diagrams.py`,
+  placed with `<!--DIAGRAM:name-->` markers) — no client JS, and they follow the light/dark theme.
+- **New "How it works" page** assembling the diagrams into a single visual walkthrough, linked from the
+  top nav.
+- **Colour language extended:** a third semantic accent, BLUE `--info`, joins GREEN `--ok` (pass) and
+  RED `--bad` (fail) for informational/neutral states; a shared legend documents the key. The top nav
+  now marks the current page.
+
 ## 2026-07-17
 
 ### Site

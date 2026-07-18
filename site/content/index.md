@@ -14,6 +14,8 @@ it is what a commercial implementer sells.
 - **Decision Record** — the signed conformant / non-conformant transmission decision.
 - **Status List** — a static, signed revocation artefact.
 
+<!--DIAGRAM:object-map-->
+
 ## Start here
 - [How verification works](verification.html) — the check, in order, fail-closed.
 - [Core specification](spec-core.html) · [Conformance](conformance.html) · [Schemas](schemas.html)
