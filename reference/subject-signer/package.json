@@ -1,0 +1,13 @@
+{
+  "name": "@h2a/subject-signer-ref",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reference subject signer — the performer's device. Produces the consent half of a grant's detached signatures (ADR-004). Holds its own key; depends on no other trust domain.",
+  "main": "src/index.ts",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": { "typescript": "^5.6.3", "@types/node": "^22.9.0" }
+}

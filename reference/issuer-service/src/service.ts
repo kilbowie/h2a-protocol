@@ -1,7 +1,7 @@
 import { createServer, type Server } from "node:http";
 import { generateKeyPairSync, randomUUID } from "node:crypto";
 import { gzipSync } from "node:zlib";
-import { signObject } from "./sign.js";
+import { signObject, signDetached } from "./sign.js";
 
 const SIZE_BITS = 1024;
 const TTL_MS = 60 * 60 * 1000;
@@ -27,6 +27,7 @@ export function buildIssuerService(opts?: {
   const token = opts?.token ?? process.env.FIDUCIARY_TOKEN ?? "dev-secret";
   const iss = opts?.iss ?? "https://issuer.example.org/h2a/issuer";
   const listId = randomUUID();
+  const issuerKid = `${iss}#issuance`; // interim: one key signs both the status list and grant issuance
   const revoked = new Set<number>();
 
   const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
@@ -58,11 +59,30 @@ export function buildIssuerService(opts?: {
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
     if (req.method === "GET" && url.pathname === "/pubkey")
-      return send(res, 200, { publicKeyPem, iss, listId });
+      return send(res, 200, { publicKeyPem, iss, listId, kid: issuerKid });
     if (req.method === "GET" && url.pathname === `/status/${listId}`)
       return send(res, 200, signedList());
     if (req.method === "GET" && url.pathname.startsWith("/status/"))
       return send(res, 404, { error: "unknown-status-list" });
+    // Sign the ISSUANCE half of a grant (ADR-004). The issuer attests it issued this grant;
+    // the fiduciary token gates it, just like revocation. Consent is signed separately by the subject.
+    if (req.method === "POST" && url.pathname === "/sign-grant") {
+      const auth = req.headers.authorization ?? "";
+      if (auth !== `Bearer ${token}`)
+        return send(res, 401, { error: "issuance-requires-issuer-authority" });
+      let raw = "";
+      req.on("data", (c) => (raw += c));
+      req.on("end", () => {
+        try {
+          const grant = JSON.parse(raw || "{}") as Record<string, unknown>;
+          const value = signDetached(privateKeyPem, grant);
+          return send(res, 200, { role: "issuance", kid: issuerKid, value });
+        } catch {
+          return send(res, 400, { error: "bad-body" });
+        }
+      });
+      return;
+    }
     if (req.method === "POST" && url.pathname === "/revoke") {
       const auth = req.headers.authorization ?? "";
       if (auth !== `Bearer ${token}`)

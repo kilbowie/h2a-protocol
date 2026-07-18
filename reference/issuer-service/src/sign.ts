@@ -19,6 +19,17 @@ export function signObject(privateKeyPem: string, obj: Record<string, unknown>):
   return s.sign(privateKeyPem).toString("base64url");
 }
 
+// Sign a grant over its canonical form MINUS the detached `signatures` array (ADR-004).
+// Both the consent and issuance signatures cover this same payload; the signer's key is what differs.
+export function signDetached(privateKeyPem: string, obj: Record<string, unknown>): string {
+  const { signatures, ...rest } = obj as { signatures?: unknown };
+  void signatures;
+  const s = createSign("SHA256");
+  s.update(canonical(rest));
+  s.end();
+  return s.sign(privateKeyPem).toString("base64url");
+}
+
 export function verifyObject(publicKeyPem: string, obj: Record<string, unknown>): boolean {
   const { signature, ...rest } = obj as { signature?: string };
   if (!signature) return false;
