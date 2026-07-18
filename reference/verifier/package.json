@@ -1,0 +1,16 @@
+{
+  "name": "@h2a/verifier-ref",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "h2a-verify — the standalone, independent H2A verifier. Zero runtime dependencies; re-derives the decision from first principles and never trusts the implementer's own record. Trust anchors are pinned by issuer namespace (ADR-010).",
+  "main": "src/index.ts",
+  "bin": { "h2a-verify": "src/cli.ts" },
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "verify": "tsx src/cli.ts",
+    "selftest": "tsx src/selftest.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": { "tsx": "^4.19.2", "typescript": "^5.6.3", "@types/node": "^22.9.0" }
+}
