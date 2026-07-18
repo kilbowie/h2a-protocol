@@ -11,7 +11,8 @@ likeness (H2A-Media) and AI memory (H2A-Memory). H2A **evidences; it does not en
 it produces a signed account of whether each act of use was conformant, and records non-conformant
 transmissions explicitly so they become admissible evidence.
 
-The key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are to be interpreted as in RFC 2119.
+The key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are to be interpreted as in
+[RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
 
 ## 1. Objects
 
@@ -82,13 +83,14 @@ a status list; if it could, it would be the revocation authority regardless of i
 
 H2A does not stop a third-party executor. When a transmission occurs outside conformance, the
 verifier records a `TRANSMITTED_NON_CONFORMANT` Decision Record with a populated
-`non_conformant_transmission` object. This record is the standard's commercial output: the
+`non_conformant_transmission` object. This record is the standard's primary output: the
 signed, externally-anchored account a counterparty relies on.
 
 ## 7. Anchoring (ADR-005)
 
-Decision Records **SHOULD** be anchored with an RFC 3161 (eIDAS-qualified) timestamp and an
-independent witness co-signature on the chain head. Anchoring **MUST** stay off the runtime
+Decision Records **SHOULD** be anchored with an [RFC 3161](https://www.rfc-editor.org/rfc/rfc3161)
+([eIDAS](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014R0910)-qualified) timestamp and
+an independent witness co-signature on the chain head. Anchoring **MUST** stay off the runtime
 critical path. No distributed-ledger / blockchain anchoring is used.
 
 <!--DIAGRAM:anchoring-pipeline-->

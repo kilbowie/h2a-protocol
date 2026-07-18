@@ -14,6 +14,7 @@ conformant — and, when it was not, recording the non-conformant transmission *
 becomes admissible evidence. Operators generate; H2A produces the signed account of what happened.
 
 ## Consequences
-- TI can outsource generation (Synthesia / HeyGen via the Bridle adapter) and still be conformant.
-- The commercial pitch is cryptographic defence against litigation, not a kill-switch.
-- Retire "gate", "halt", "enforce" from spec and marketing language.
+- An operator can outsource generation to a third-party generation provider (via an implementer's
+  adapter) and still be conformant.
+- H2A provides cryptographic evidence for dispute resolution, not a kill-switch.
+- Retire "gate", "halt", "enforce" from spec language.

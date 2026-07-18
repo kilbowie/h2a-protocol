@@ -13,4 +13,5 @@ authorisation** — it never manufactures it. No `CONSENT_CAPTURE`, no valid con
 
 ## Consequences
 - Consent is traceable to a live subject interaction, not a custodian's say-so.
-- Gives GDPR Art. 7(1) "demonstrate consent on every act" a concrete artefact.
+- Gives [GDPR Art. 7(1)](https://eur-lex.europa.eu/eli/reg/2016/679/oj#art_7) "demonstrate consent on
+  every act" a concrete artefact.

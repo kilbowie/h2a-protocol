@@ -2,7 +2,7 @@
 
 A small, self-contained verifier that runs the conformance check sequence and emits a decision
 record. It is **fail-closed** and runs entirely outside any operator's infrastructure — this is
-what "the check is free" looks like in code. It is a reference, not Bridle.
+what "the check is free" looks like in code. It is a reference, not a production implementation.
 
 ```bash
 pip install -r requirements.txt

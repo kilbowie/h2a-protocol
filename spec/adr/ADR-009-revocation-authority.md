@@ -3,7 +3,7 @@
 **Status:** Accepted (2026-07-17). Refines ADR-005 and ADR-006.
 
 ## Context
-An implementer (Bridle) that exposes a revoke endpoint and signs the status list *is* the revocation
+An implementer that exposes a revoke endpoint and signs the status list *is* the revocation
 authority, whatever the org chart says. Possession of the signing key is the authority: whoever signs
 the list can publish one with the bit cleared. That quietly preserves exactly the power the
 issuer/implementer split exists to remove, and a union GC will see straight through it.

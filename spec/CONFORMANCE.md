@@ -9,8 +9,9 @@ Conformance is honest by construction: a level claims only what it can prove.
   with a resolvable, short-TTL, **signed** status list whose signature the verifier checks against the
   issuer's key. The verifier is fetch-and-verify only and is never the revocation authority (ADR-009);
   a reference issuer/status service lives in `reference/issuer-service/`.
-- **L3 — Anchored.** L2 plus external anchoring (ADR-005): eIDAS-qualified TSA timestamps and an
-  independent witness co-signature. L3 is the level an underwriter can rely on.
+- **L3 — Anchored.** L2 plus external anchoring (ADR-005):
+  [eIDAS](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014R0910)-qualified TSA
+  timestamps and an independent witness co-signature. L3 is the level an underwriter can rely on.
 
 <!--DIAGRAM:conformance-ladder-->
 

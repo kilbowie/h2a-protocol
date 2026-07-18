@@ -1,12 +1,14 @@
 # H2A Protocol
 
-**H2A is a neutral, open standard for the consent, attestation, and revocation of AI-generated
-likeness and AI memory.** It answers one question, verifiably: *was this allowed?*
+**H2A is a neutral, open, proposed standard for the consent, attestation, and revocation of
+AI-generated likeness and AI memory.** It answers one question, verifiably: *was this allowed?*
 
 H2A **evidences; it does not enforce.** For every act of use it produces a signed, externally
 anchored record of whether the transmission was conformant — and when it was not, it records that
-explicitly, so the record is admissible evidence. The check is free and open; the guarantee around
-it is what a commercial implementer sells.
+explicitly, so the record is admissible evidence. The check is free and open; conformant
+implementations may offer commercial guarantees around it.
+
+*A proposed open standard, authored by Kilbowie. Working draft — see [Governance](governance.html).*
 
 ## The four objects
 - **Grant** — authority to use a subject within a bounded scope, revocable at point of use.

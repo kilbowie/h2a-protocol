@@ -7,9 +7,10 @@ Ed25519 is not supported at standard tier by AWS KMS or Azure Managed HSM, and r
 counterparties care about FIPS validation.
 
 ## Decision
-**ECDSA P-256 (ES256)** is the mandatory-to-implement baseline — FIPS 140-3 validated, supported
-everywhere, credible with a general counsel. The spec is **curve-agnostic via the `alg` header**,
-so post-quantum migration is a header change, not a redesign.
+**ECDSA P-256 (ES256)** is the mandatory-to-implement baseline —
+[FIPS 140-3](https://csrc.nist.gov/pubs/fips/140-3/final) validated, supported everywhere, credible
+with a general counsel. The spec is **curve-agnostic via the `alg` header**, so post-quantum migration
+is a header change, not a redesign.
 
 ## Consequences
 - Guaranteed interoperability floor.

@@ -30,7 +30,7 @@
     },
     "generator": {
       "type": "object",
-      "description": "What produced the output. TI governs, never generates — generation is outsourced (e.g. Synthesia/HeyGen) via the Bridle adapter.",
+      "description": "What produced the output. The operator governs, never generates — generation is outsourced to a third-party generation provider via an implementer's adapter.",
       "additionalProperties": false,
       "properties": {
         "adapter": { "type": "string" },

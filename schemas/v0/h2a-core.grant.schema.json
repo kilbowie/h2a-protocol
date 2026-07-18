@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://h2a-protocol.org/schemas/v0/h2a-core.grant.schema.json",
   "title": "H2A Core Grant",
-  "description": "Authority for a grantee (operator) to use a subject within a bounded scope, revocable at point of use. Central H2A-Core object. iss MUST resolve under a rights-holder or fiduciary namespace, MUST NOT resolve under the operator's domain, and SHOULD NOT resolve under the implementer's (Bridle's) domain (ADR-001).",
+  "description": "Authority for a grantee (operator) to use a subject within a bounded scope, revocable at point of use. Central H2A-Core object. iss MUST resolve under a rights-holder or fiduciary namespace, MUST NOT resolve under the operator's domain, and SHOULD NOT resolve under the implementer's domain (ADR-001).",
   "type": "object",
   "additionalProperties": false,
   "required": [

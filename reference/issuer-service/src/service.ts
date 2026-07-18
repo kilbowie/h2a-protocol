@@ -25,7 +25,7 @@ export function buildIssuerService(opts?: {
   iss?: string;
 }): IssuerService {
   const token = opts?.token ?? process.env.FIDUCIARY_TOKEN ?? "dev-secret";
-  const iss = opts?.iss ?? "https://equity.example.org/h2a/issuer";
+  const iss = opts?.iss ?? "https://issuer.example.org/h2a/issuer";
   const listId = randomUUID();
   const revoked = new Set<number>();
 

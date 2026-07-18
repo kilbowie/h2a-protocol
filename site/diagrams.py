@@ -271,7 +271,7 @@ def anchoring_pipeline() -> str:
         + _conn("bad", "recorded, not blocked")
         + _node("Decision Record — TRANSMITTED_NON_CONFORMANT",
                 "with a populated <code>non_conformant_transmission</code> "
-                "(<code>downstream_ref</code>, <code>why</code>) — the commercial output", "dg-bad dg-flow-w")
+                "(<code>downstream_ref</code>, <code>why</code>) — the standard's primary output", "dg-bad dg-flow-w")
         + _conn("info", "anchored off the runtime critical path")
         + _node("RFC 3161 TSA timestamp + independent witness co-signature",
                 "eIDAS-qualified · no blockchain (ADR-005)", "dg-info dg-flow-w")
@@ -281,8 +281,9 @@ def anchoring_pipeline() -> str:
     return _fig(
         f'<div class="dg-flow">{body}</div>',
         "H2A evidences; it does not enforce. A transmission outside conformance is recorded explicitly "
-        "as a signed Decision Record, then anchored with a qualified timestamp and an independent "
-        "witness co-signature so it stands as admissible evidence.",
+        "as a signed Decision Record, then anchored with a qualified timestamp "
+        '(<a href="references.html">RFC 3161 / eIDAS</a>) and an independent witness co-signature so it '
+        "stands as admissible evidence.",
         aria=("Pipeline: a non-conformant transmission is recorded as a Decision Record marked "
               "TRANSMITTED_NON_CONFORMANT, then anchored with an RFC 3161 timestamp and a witness "
               "co-signature onto an append-only chain head."),

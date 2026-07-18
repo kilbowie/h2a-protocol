@@ -82,6 +82,7 @@ PAGES = [
     (CONTENT / "schemas.md", "schemas.html", "Schemas"),
     (CONTENT / "decisions.md", "decisions.html", "Decisions"),
     (CONTENT / "governance.md", "governance.html", "Governance"),
+    (CONTENT / "references.md", "references.html", "References"),
     (ROOT / "CHANGELOG.md", "changelog.html", "Changelog"),
 ]
 
@@ -331,7 +332,8 @@ TEMPLATE = """<!doctype html>
 {banner}
 <nav class="top">{nav}</nav>
 <main>{body}</main>
-<footer>{updated}H2A Protocol · working draft · <a href="https://h2a-protocol.org">h2a-protocol.org</a>.
+<footer>{updated}H2A Protocol · a proposed open standard authored by Kilbowie · working draft ·
+<a href="https://h2a-protocol.org">h2a-protocol.org</a>.
 Spec text CC BY 4.0; schemas &amp; code Apache-2.0.</footer>
 {script}
 </body></html>"""

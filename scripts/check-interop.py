@@ -26,7 +26,7 @@ from h2a_ref.verify import (  # noqa: E402
     Use, bit_is_revoked, signing_bytes, verify, verify_status_sig,
 )
 
-ISS = "https://equity.example.org/h2a/issuer"
+ISS = "https://issuer.example.org/h2a/issuer"
 
 
 def build_grant(now):
@@ -46,7 +46,7 @@ def build_grant(now):
         "grant_id": "3f2a1c40-0d1e-4b2a-9c33-8a1b2c3d4e5f",
         "iss": ISS,
         "subject_ref": "urn:h2a:subject:jane-actor-001",
-        "grantee_ref": "urn:h2a:grantee:truly-imagined",
+        "grantee_ref": "urn:h2a:grantee:example-operator",
         "scope": {"purposes": ["promotional-video"], "media_types": ["video"],
                   "territories": ["GB", "US"], "exclusions": ["political"]},
         "profiles": ["h2a-media"],

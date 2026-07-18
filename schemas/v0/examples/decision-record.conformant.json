@@ -9,7 +9,7 @@
   "effective_chain_horizon": "PT30M",
   "max_chain_horizon": "PT1H",
   "non_conformant_transmission": null,
-  "witness": { "tsa_token_ref": "tsa:rfc3161:abc", "witness_cosign_ref": "witness:hdicr:def" },
+  "witness": { "tsa_token_ref": "tsa:rfc3161:abc", "witness_cosign_ref": "witness:example:def" },
   "created_at": "2026-07-20T14:03:01Z",
   "alg": "ES256",
   "signature": "BASE64URL_SIG"

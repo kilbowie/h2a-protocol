@@ -11,4 +11,8 @@ hand-paste legal text.
 **Decisions.** Recorded as ADRs under `spec/adr/` (ADR-001 … ADR-009), published at
 [h2a-protocol.org/decisions.html](https://h2a-protocol.org/decisions.html).
 
+**Authorship.** H2A was authored by **Kilbowie** and is offered as a neutral, proposed open standard;
+it privileges no implementation and names no operator, implementer, or vendor in its trust model.
+Stewardship is intended to pass to a neutral Foundation.
+
 **Neutrality.** Public from day one; the stewarding Foundation is never in the runtime critical path.

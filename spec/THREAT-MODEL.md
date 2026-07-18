@@ -8,9 +8,10 @@ the record alone:
 - **Backdating** — claiming an older beacon than the recorder actually held.
 - **Hidden work** — omitting acts from the record.
 
-**Mitigation (ADR-005):** external anchoring — an eIDAS-qualified TSA timestamp plus an independent
-witness co-signature on an append-only chain head — provides an external time the recorder cannot
-forge, closing both attacks. Kept off the runtime critical path.
+**Mitigation (ADR-005):** external anchoring — an
+[eIDAS](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014R0910)-qualified TSA timestamp
+plus an independent witness co-signature on an append-only chain head — provides an external time the
+recorder cannot forge, closing both attacks. Kept off the runtime critical path.
 
 ## Fabricated consent
 A custodian could assert consent that never happened.

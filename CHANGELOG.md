@@ -7,6 +7,18 @@ follows [Keep a Changelog](https://keepachangelog.com).
 
 ## 2026-07-18
 
+### Neutrality & references
+- **Neutral, proposed-standard framing.** All references to specific commercial actors were removed
+  from the spec, ADRs, schemas, reference code, and site. A named example implementer, operator,
+  generation vendors, specific unions/CMOs, and a specific witness domain are now stated only as
+  neutral roles ("the implementer", "an operator", "a third-party generation provider", "a union or
+  CMO", "an independent witness service"). Sales framing was rewritten as neutral standard language.
+- **Authorship.** H2A is now attributed to **Kilbowie** as author, in the site footer, the home page,
+  and Governance — offered as a neutral standard that privileges no implementation.
+- **Cited sources.** Every external standard and legal instrument is now linked at its point of mention
+  (RFC 2119, RFC 3161, eIDAS / Reg. (EU) 910/2014, GDPR Art. 7, C2PA, FIPS 140-3) and collected on a new
+  **[References](references.html)** page in the nav.
+
 ### Site
 - **Architecture & process-flow diagrams.** The protocol's key flows are now shown visually, not just
   in prose: the five-gate verification algorithm (fail-closed, with the reason code each gate emits),

@@ -39,9 +39,9 @@ def main() -> None:
     grant = {
         "h2a_version": "0.1",
         "grant_id": "3f2a1c40-0d1e-4b2a-9c33-8a1b2c3d4e5f",
-        "iss": "https://equity.example.org/h2a/issuer",
+        "iss": "https://issuer.example.org/h2a/issuer",
         "subject_ref": "urn:h2a:subject:jane-actor-001",
-        "grantee_ref": "urn:h2a:grantee:truly-imagined",
+        "grantee_ref": "urn:h2a:grantee:example-operator",
         "scope": {
             "purposes": ["promotional-video"],
             "media_types": ["video"],
@@ -51,7 +51,7 @@ def main() -> None:
         "profiles": ["h2a-media"],
         "lease": {"cap": 500, "unit": "usd", "provider_agnostic": True,
                   "nbf": iso(now), "exp": iso(now + timedelta(days=90))},
-        "status": {"uri": "https://equity.example.org/h2a/status/2026-q3.json",
+        "status": {"uri": "https://issuer.example.org/h2a/status/2026-q3.json",
                    "mirrors": [], "index": 42},
         "revocation_horizon": "PT30M",
         "delegation": {"parent": None, "depth": 0,

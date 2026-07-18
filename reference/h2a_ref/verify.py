@@ -4,7 +4,7 @@ Deliberately small and dependency-light. It demonstrates the check every conform
 verifier performs, in order, and emits a decision record. It is fail-closed: any error,
 missing field, or expired artefact yields a REFUSED / non-conformant decision, never a permit.
 
-This is a *reference*, not Bridle. It runs entirely outside any operator's infrastructure.
+This is a *reference*, not a production implementation. It runs entirely outside any operator's infrastructure.
 """
 from __future__ import annotations
 

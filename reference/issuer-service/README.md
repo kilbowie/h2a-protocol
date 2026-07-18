@@ -4,8 +4,8 @@ This service is the **revocation authority**. It holds the status-list **signing
 only component that can revoke — revocation is: set the bit, re-sign the list, publish it.
 
 It represents the **fiduciary / rights-holder trust domain** (ADR-001, ADR-009). In production it is
-operated by the fiduciary (a union / CMO) with its own key custody, in a trust domain separate from
-any implementer. An implementer such as Bridle holds only this service's **public key** and can only
+operated by the fiduciary (a union or CMO) with its own key custody, in a trust domain separate from
+any implementer. An implementer holds only this service's **public key** and can only
 **fetch and verify** the signed list — it cannot produce one, and has no revoke endpoint.
 
 Zero runtime dependencies (Node built-ins only).

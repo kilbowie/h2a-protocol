@@ -12,7 +12,7 @@
     "why": "horizon_exceeded",
     "horizon_exceeded_by_ms": 3400
   },
-  "witness": { "tsa_token_ref": "tsa:rfc3161:xyz", "witness_cosign_ref": "witness:hdicr:uvw" },
+  "witness": { "tsa_token_ref": "tsa:rfc3161:xyz", "witness_cosign_ref": "witness:example:uvw" },
   "created_at": "2026-07-20T14:35:00Z",
   "alg": "ES256",
   "signature": "BASE64URL_SIG"
