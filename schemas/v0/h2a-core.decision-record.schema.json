@@ -38,6 +38,29 @@
     },
     "effective_chain_horizon": { "type": "string", "description": "Realised horizon of the chain = max of all links." },
     "max_chain_horizon": { "type": "string" },
+    "horizon_committed_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Committed revocation horizon in force for this act, in milliseconds. What was promised. Core evidence field; when the commercial profile applies it is the horizon of the grant's assurance_level."
+    },
+    "horizon_measured_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Measured revocation-to-cutoff latency in milliseconds. What was delivered. Feeds the loss table. MAY be absent where a deployment does not yet instrument halt latency (see measured_latency_ms, which it supersedes for the SLA)."
+    },
+    "horizon_breach": {
+      "type": "boolean",
+      "description": "Derived: true when horizon_measured_ms > horizon_committed_ms. The SLA trigger. Absent when horizon_measured_ms is not populated."
+    },
+    "chain_conformance": {
+      "type": "string",
+      "enum": ["conformant", "non_conformant_downstream", "unknown"],
+      "description": "Typed chain-conformance outcome for this act (formerly implicit in non_conformant_transmission)."
+    },
+    "exposure_snapshot": {
+      "type": "object",
+      "description": "Optional commercial-profile extension (SPEC-COMMERCIAL / h2a-commercial): per-act limit, aggregate limit, aggregate consumed, and assurance_level at the time of the act. Opaque to Core; constrained by the commercial profile. Not a Core conformance requirement (ADR-012); verifiers that do not implement the commercial profile MUST ignore it."
+    },
     "non_conformant_transmission": {
       "type": ["object", "null"],
       "description": "Present and non-null ONLY when decision is TRANSMITTED_NON_CONFORMANT. Records a transmission that occurred outside conformance so it becomes admissible evidence.",

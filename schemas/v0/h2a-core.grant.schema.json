@@ -55,8 +55,8 @@
     },
     "profiles": {
       "type": "array",
-      "description": "Which asset-bound profiles apply to this grant.",
-      "items": { "type": "string", "enum": ["h2a-media", "h2a-memory"] },
+      "description": "Which profiles apply to this grant. 'h2a-commercial' (SPEC-COMMERCIAL) is optional and never a Core conformance requirement (ADR-012).",
+      "items": { "type": "string", "enum": ["h2a-media", "h2a-memory", "h2a-commercial"] },
       "uniqueItems": true
     },
     "lease": {
@@ -98,6 +98,10 @@
         "effective_chain_horizon": { "type": "string", "description": "Realised horizon of the whole chain = max of all links (a chain is only as revocable as its slowest link)." },
         "max_chain_horizon": { "type": "string", "description": "Ceiling the chain may not exceed." }
       }
+    },
+    "exposure": {
+      "type": "object",
+      "description": "Optional commercial-profile extension (SPEC-COMMERCIAL / h2a-commercial). Opaque to Core: its shape is constrained by h2a-commercial.profile.schema.json only when this grant lists 'h2a-commercial' in profiles. Not a Core conformance requirement (ADR-012). A verifier that does not implement the commercial profile MUST ignore this field and MUST NOT refuse the grant because it is present."
     },
     "alg": { "type": "string", "enum": ["ES256", "ES384", "EdDSA"], "default": "ES256", "description": "Signature algorithm. ES256 (P-256) is mandatory-to-implement; curve-agnostic via this header." },
     "signatures": {

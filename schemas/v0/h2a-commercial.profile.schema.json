@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://h2a-protocol.org/schemas/v0/h2a-commercial.profile.schema.json",
+  "title": "H2A-Commercial Profile — Exposure",
+  "description": "Optional commercial profile (SPEC-COMMERCIAL). NOT a Core conformance requirement (ADR-012): a Core-conformant implementation is not required to support it, and a verifier that does not implement it MUST ignore the grant's 'exposure' field. Defines the exposure declaration carried on a grant's optional 'exposure' field (and snapshotted on a Decision Record's 'exposure_snapshot'). Money objects carry their own ISO-4217 currency, so the profile is inherently multi-currency; no cross-currency conversion is defined. remedy_basis is locked to 'service_credit': any value implying indemnity would change the legal character of the instrument (ADR-011, and SPEC-COMMERCIAL prevention-not-indemnity rule).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assurance_level", "committed_horizon_ms", "remedy_basis"],
+  "$defs": {
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": { "type": "number", "minimum": 0, "description": "Amount in major units of the currency." },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 currency code." }
+      }
+    }
+  },
+  "properties": {
+    "per_act_limit": {
+      "$ref": "#/$defs/money",
+      "description": "Per-claim cap: the maximum remedy on any single governed act. Does NOT enter the premium base (ADR-011 §2)."
+    },
+    "aggregate_limit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency", "period_start", "period_end"],
+      "properties": {
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 currency code." },
+        "period_start": { "type": "string", "format": "date-time" },
+        "period_end": { "type": "string", "format": "date-time" }
+      },
+      "description": "Annual aggregate limit: the premium base. premium = aggregate_limit.amount x rate(assurance_level). A cap on total service credits in the period, not a promise to pay."
+    },
+    "assurance_level": {
+      "type": "string",
+      "enum": ["L1", "L2", "L3"],
+      "description": "The unified assurance/conformance level in force: L1 software attestation (= Verifiable), L2 witnessed attestation (= Attested), L3 enclave attestation (= Anchored). Same ladder as CONFORMANCE.md, priced (ADR-011)."
+    },
+    "committed_horizon_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Committed revocation horizon for this assurance level, in milliseconds."
+    },
+    "remedy_basis": {
+      "type": "string",
+      "enum": ["service_credit"],
+      "description": "Locked to service_credit. Single-value enum by design: any value implying indemnity changes the legal character of the instrument and MUST NOT be added without the conversation recorded in ADR-011."
+    }
+  }
+}

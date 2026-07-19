@@ -23,7 +23,13 @@ The key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY are to be interpreted 
 | **Decision Record** | Signed record of a conformant / non-conformant transmission decision | `h2a-core.decision-record.schema.json` |
 | **Status List** | Static, signed revocation artefact | `h2a-core.status-list.schema.json` |
 
-Profiles (`h2a-media`, `h2a-memory`) are asset-bound and apply only when a Grant lists them.
+Profiles apply only when a Grant lists them: `h2a-media` and `h2a-memory` are asset-bound;
+`h2a-commercial` (SPEC-COMMERCIAL) carries optional exposure/assurance fields for a commercial
+implementer. **Profiles MAY define additional Grant and Decision Record fields beyond Core.** A
+verifier **MUST** ignore fields it does not recognise and **MUST NOT** refuse a Grant solely because
+it carries profile fields outside Core. **No profile is ever required for Core conformance** (see
+CONFORMANCE.md). This forward-compatibility rule is what keeps a commercial implementer's pricing
+fields out of the Core conformance surface (ADR-012).
 
 ## 2. Identity (ADR-001)
 

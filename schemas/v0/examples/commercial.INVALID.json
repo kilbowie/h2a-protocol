@@ -1,0 +1,5 @@
+{
+  "assurance_level": "L2",
+  "committed_horizon_ms": 10000,
+  "remedy_basis": "indemnity"
+}

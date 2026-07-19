@@ -22,11 +22,14 @@ POSITIVE = {
     "status-list.valid.json": "h2a-core.status-list.schema.json",
     "media.valid.json": "h2a-media.profile.schema.json",
     "memory.derived.valid.json": "h2a-memory.profile.schema.json",
+    "commercial.valid.json": "h2a-commercial.profile.schema.json",
+    "loss-event.valid.json": "h2a-loss-event.schema.json",
 }
 # example file -> schema it MUST fail against
 NEGATIVE = {
     "memory.derived.INVALID.json": "h2a-memory.profile.schema.json",
     "decision-record.INVALID.json": "h2a-core.decision-record.schema.json",
+    "commercial.INVALID.json": "h2a-commercial.profile.schema.json",
 }
 
 

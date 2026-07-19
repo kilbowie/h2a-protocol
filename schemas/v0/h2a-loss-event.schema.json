@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://h2a-protocol.org/schemas/v0/h2a-loss-event.schema.json",
+  "title": "H2A Loss Event",
+  "description": "Operational / actuarial record associated with the commercial profile. NOT a Core conformance requirement. One record per halt, per horizon breach, and per near-miss above a configurable threshold. The accumulated corpus is the loss table — the actuarial asset (ADR-011). These are PREVENTION events (a stopped or narrowly-stopped act), not indemnity claims: remedy_triggered records whether a service-credit remedy followed, never a payout. Design it now while volume is small enough to backfill.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "event_type", "assurance_level", "occurred_at"],
+  "$defs": {
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$", "description": "ISO 4217 currency code." }
+      }
+    }
+  },
+  "properties": {
+    "event_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "event_type": {
+      "type": "string",
+      "enum": ["halt", "horizon_breach", "near_miss"],
+      "description": "halt = an in-flight act was stopped; horizon_breach = measured horizon exceeded the committed horizon; near_miss = a stopped/avoided loss above the configured threshold."
+    },
+    "assurance_level": { "type": "string", "enum": ["L1", "L2", "L3"] },
+    "grant_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$" },
+    "record_id": { "type": "string", "pattern": "^[0-9a-fA-F-]{36}$", "description": "Decision Record this event derives from, if any." },
+    "load_condition": { "type": "string", "description": "Operating condition, e.g. 'nominal', 'peak', 'drill'." },
+    "horizon_committed_ms": { "type": "integer", "minimum": 0, "description": "What was promised, in milliseconds." },
+    "horizon_measured_ms": { "type": "integer", "minimum": 0, "description": "What was delivered, in milliseconds." },
+    "exposure_at_risk": { "$ref": "#/$defs/money", "description": "Declared exposure on the act(s) at risk in this event." },
+    "remedy_triggered": { "type": "boolean", "description": "Whether a service-credit remedy followed. Never an indemnity payout (ADR-011)." },
+    "root_cause": { "type": "string" },
+    "remediation_ref": { "type": "string", "description": "Pointer to the remediation record / ticket." },
+    "near_miss_threshold_ms": { "type": "integer", "minimum": 0, "description": "The configured near-miss threshold in force, when event_type = near_miss." },
+    "occurred_at": { "type": "string", "format": "date-time" }
+  }
+}

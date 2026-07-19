@@ -1,0 +1,12 @@
+{
+  "assurance_level": "L2",
+  "committed_horizon_ms": 10000,
+  "remedy_basis": "service_credit",
+  "per_act_limit": { "amount": 1000, "currency": "GBP" },
+  "aggregate_limit": {
+    "amount": 5000000,
+    "currency": "GBP",
+    "period_start": "2026-01-01T00:00:00Z",
+    "period_end": "2027-01-01T00:00:00Z"
+  }
+}

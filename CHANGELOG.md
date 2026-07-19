@@ -5,6 +5,31 @@ draft**, so entries are dated rather than version-tagged; per-document versions 
 are noted where they change. New changes go at the **top**, under the current date. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com).
 
+## 2026-07-19
+
+### Commercial profile (optional, non-Core)
+- **New `h2a-commercial` profile.** [SPEC-COMMERCIAL](spec/SPEC-COMMERCIAL.md) defines an optional
+  exposure/assurance profile for a commercial implementer that prices an assurance commitment. It is
+  **never required for Core conformance** — a Core-conformant verifier ignores it. New schemas
+  `h2a-commercial.profile.schema.json` (the exposure declaration — per-act limit, aggregate limit,
+  assurance level, committed horizon, `remedy_basis` locked to `service_credit`) and
+  `h2a-loss-event.schema.json` (the actuarial loss record). Money objects carry ISO-4217 currency, so
+  the profile is inherently multi-currency.
+- **Core forward-compatibility rule (SPEC-CORE §1 → still v0.2).** Profiles MAY define additional Grant
+  and Decision Record fields; a verifier MUST ignore unrecognised fields and MUST NOT refuse a grant
+  for carrying them. Enables the commercial fields to ride on the Core grant/decision-record without
+  entering the conformance surface.
+- **Grant + Decision Record additions.** Optional opaque `exposure` on the grant and `exposure_snapshot`
+  on the decision record (profile-constrained). Core-owned evidence fields added to the decision record:
+  `horizon_committed_ms`, `horizon_measured_ms`, `horizon_breach`, `chain_conformance`.
+- **The assurance ladder is the conformance ladder, priced.** CONFORMANCE.md now states L1/L2/L3 are one
+  ladder viewed two ways (Verifiable/Attested/Anchored = software/witnessed/enclave), and that profiles
+  are never required for conformance. CONFORMANCE → v0.3 (clarified).
+- **ADRs.** [ADR-011](spec/adr/ADR-011-commercial-model.md) — commercial model (governed act billed,
+  annual aggregate limit as the premium base, assurance-priced, service-credit remedy).
+  [ADR-012](spec/adr/ADR-012-exposure-fields-optional-profile.md) — exposure fields are an optional
+  profile, never Core, with the neutrality rationale.
+
 ## 2026-07-18
 
 ### Neutrality & references

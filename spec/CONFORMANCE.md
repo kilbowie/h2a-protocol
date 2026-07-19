@@ -15,6 +15,20 @@ Conformance is honest by construction: a level claims only what it can prove.
 
 <!--DIAGRAM:conformance-ladder-->
 
+## Profiles are not required for conformance
+Conformance is defined entirely over Core objects. **A Core-conformant implementation is not required
+to support any profile** (`h2a-media`, `h2a-memory`, or `h2a-commercial`). A verifier **MUST** ignore
+profile fields it does not recognise (SPEC-CORE §1). In particular, a commercial implementer's
+exposure/pricing fields (`h2a-commercial`, SPEC-COMMERCIAL) are outside the conformance surface by
+construction (ADR-012).
+
+## One ladder, viewed two ways
+The commercial **assurance level** (SPEC-COMMERCIAL) is the *same* L1/L2/L3 ladder defined here, not a
+second axis: **L1 = Verifiable = software attestation, L2 = Attested = witnessed attestation,
+L3 = Anchored = enclave attestation** (ADR-011). The conformance level is the technical claim a
+deployment can prove; the assurance level is that same claim priced. A grant MUST NOT declare an
+assurance level above what the deployment proves — the claim-discipline rule below applies to both.
+
 ## Test suite
 `scripts/validate-schemas.py` gates schema + example conformance (positive and negative) and runs in
 CI before every deploy. `reference/` provides the executable verification algorithm and the
