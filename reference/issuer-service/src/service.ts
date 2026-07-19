@@ -1,7 +1,8 @@
 import { createServer, type Server } from "node:http";
-import { generateKeyPairSync, randomUUID } from "node:crypto";
+import { generateKeyPairSync, createPrivateKey, createPublicKey, randomUUID } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
+import { readFileSync, writeFileSync } from "node:fs";
 import { signObject, signDetached } from "./sign.js";
 
 const SIZE_BITS = 1024;
@@ -21,19 +22,58 @@ export interface IssuerService {
 }
 
 // The revocation authority. Holds the private signing key; nobody else can produce a valid list.
+//
+// Key/list custody (durable vs ephemeral). By default (nothing set) the signing key and listId are
+// generated PER PROCESS — a restart changes the trust anchor Bridle pinned at boot, and every prior
+// `status.uri` 404s. That is fine for a driven local demo but NOT for a hosted deployment. For a stable
+// deployment, set (mirroring the witness's WITNESS_SIGNING_KEY):
+//   ISSUER_SIGNING_KEY  — a durable EC P-256 PKCS8 PEM (the whole authority; keep it a real secret)
+//   ISSUER_LIST_ID      — a stable status-list id, so published `status.uri`s survive restarts
+//   ISSUER_ISS          — the issuer namespace (default kept for local/interop; override in prod)
+//   ISSUER_REVOKED_PATH — optional JSON file (on a persistent volume) so live revokes survive a restart
+// Real fiduciary custody (a KMS the Bridle deployment cannot reach) is the follow-on — see RUNBOOK §1.
 export function buildIssuerService(opts?: {
   token?: string;
   iss?: string;
+  signingKeyPem?: string;
+  listId?: string;
+  revokedPath?: string;
 }): IssuerService {
   const token = opts?.token ?? process.env.FIDUCIARY_TOKEN ?? "dev-secret";
-  const iss = opts?.iss ?? "https://issuer.example.org/h2a/issuer";
-  const listId = randomUUID();
+  const iss = opts?.iss ?? process.env.ISSUER_ISS ?? "https://issuer.example.org/h2a/issuer";
+  const listId = opts?.listId ?? process.env.ISSUER_LIST_ID ?? randomUUID();
   const issuerKid = `${iss}#issuance`; // interim: one key signs both the status list and grant issuance
-  const revoked = new Set<number>();
+  const revokedPath = opts?.revokedPath ?? process.env.ISSUER_REVOKED_PATH;
 
-  const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
-  const privateKeyPem = privateKey.export({ type: "pkcs8", format: "pem" }).toString();
-  const publicKeyPem = publicKey.export({ type: "spki", format: "pem" }).toString();
+  // Load a durable signing key if provided (env may carry \n-escaped PEM), else generate an ephemeral one.
+  let privateKeyPem: string;
+  const durableKey = opts?.signingKeyPem ?? process.env.ISSUER_SIGNING_KEY;
+  if (durableKey) {
+    // Normalise + validate: accept a real-newline or \n-escaped PKCS8 PEM, re-export canonically.
+    const pem = durableKey.includes("\\n") ? durableKey.replace(/\\n/g, "\n") : durableKey;
+    privateKeyPem = createPrivateKey(pem).export({ type: "pkcs8", format: "pem" }).toString();
+  } else {
+    const { privateKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
+    privateKeyPem = privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+    console.warn(
+      "ISSUER_SIGNING_KEY not set — generated an EPHEMERAL key; a restart changes the trust anchor and " +
+        "invalidates every previously published status list. Set it for a hosted deployment (see RUNBOOK §1).",
+    );
+  }
+  const publicKeyPem = createPublicKey(privateKeyPem).export({ type: "spki", format: "pem" }).toString();
+
+  // Revoked set: optionally durable via a JSON file on a volume, so a live revoke survives a restart.
+  const revoked = new Set<number>();
+  if (revokedPath) {
+    try {
+      for (const i of JSON.parse(readFileSync(revokedPath, "utf8")) as number[]) revoked.add(i);
+    } catch { /* absent/unreadable on first boot — start empty */ }
+  }
+  const persistRevoked = () => {
+    if (!revokedPath) return;
+    try { writeFileSync(revokedPath, JSON.stringify([...revoked])); }
+    catch (e) { console.error(`could not persist revoked set to ${revokedPath}:`, (e as Error).message); }
+  };
 
   function signedList() {
     const now = Date.now();
@@ -95,6 +135,7 @@ export function buildIssuerService(opts?: {
           const { index } = JSON.parse(raw || "{}") as { index: number };
           if (typeof index !== "number") return send(res, 400, { error: "index-required" });
           revoked.add(index);
+          persistRevoked();
           return send(res, 200, { revoked: true, status: signedList() });
         } catch {
           return send(res, 400, { error: "bad-body" });
@@ -115,8 +156,11 @@ if (isMain) {
   const svc = buildIssuerService();
   const port = Number(process.env.PORT ?? 8790);
   svc.server.listen(port, () => {
+    const durable = !!process.env.ISSUER_SIGNING_KEY;
     console.log(`issuer/status service on :${port}`);
-    console.log(`  status list id: ${svc.listId}`);
+    console.log(`  key custody:    ${durable ? "DURABLE (ISSUER_SIGNING_KEY)" : "EPHEMERAL (per-process)"}`);
+    console.log(`  status list id: ${svc.listId}${process.env.ISSUER_LIST_ID ? " (pinned)" : " (generated)"}`);
+    console.log(`  iss:            ${svc.iss}`);
     console.log(`  pubkey at:      GET /pubkey`);
     console.log(`  list at:        GET /status/${svc.listId}`);
   });
