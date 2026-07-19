@@ -1,5 +1,6 @@
 import { createServer, type Server } from "node:http";
 import { generateKeyPairSync, createPublicKey } from "node:crypto";
+import { pathToFileURL } from "node:url";
 import { signObject } from "./sign.js";
 
 // Reference INDEPENDENT WITNESS service (ADR-005 · L3). A second party that co-signs an implementer's
@@ -73,8 +74,9 @@ export function buildWitnessService(opts?: { witness?: string; privateKeyPem?: s
   return { server, publicKeyPem, witness };
 }
 
-// Standalone start.
-const isMain = import.meta.url === `file://${process.argv[1]}`;
+// Standalone start. pathToFileURL so argv[1] matches import.meta.url on Windows too (drive letter,
+// backslashes) as well as macOS/Linux — a raw `file://${argv[1]}` never matches on Windows.
+const isMain = !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
   const svc = buildWitnessService();
   const port = Number(process.env.PORT ?? 8791);

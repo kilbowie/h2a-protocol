@@ -1,5 +1,6 @@
 import { createServer, type Server } from "node:http";
 import { generateKeyPairSync, randomUUID } from "node:crypto";
+import { pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 import { signObject, signDetached } from "./sign.js";
 
@@ -107,8 +108,9 @@ export function buildIssuerService(opts?: {
   return { server, publicKeyPem, listId, iss };
 }
 
-// Standalone start.
-const isMain = import.meta.url === `file://${process.argv[1]}`;
+// Standalone start. pathToFileURL so argv[1] matches import.meta.url on Windows too (drive letter,
+// backslashes) as well as macOS/Linux — a raw `file://${argv[1]}` never matches on Windows.
+const isMain = !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
   const svc = buildIssuerService();
   const port = Number(process.env.PORT ?? 8790);
