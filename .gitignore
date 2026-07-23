@@ -5,3 +5,7 @@ __pycache__/
 *.pyc
 .DS_Store
 *.log
+# Local env files may hold real signing keys / tokens — never commit them.
+.env
+.env.*
+!.env.example
