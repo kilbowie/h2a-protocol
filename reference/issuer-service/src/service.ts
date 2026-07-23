@@ -40,8 +40,11 @@ export function buildIssuerService(opts?: {
   revokedPath?: string;
 }): IssuerService {
   const token = opts?.token ?? process.env.FIDUCIARY_TOKEN ?? "dev-secret";
-  const iss = opts?.iss ?? process.env.ISSUER_ISS ?? "https://issuer.example.org/h2a/issuer";
-  const listId = opts?.listId ?? process.env.ISSUER_LIST_ID ?? randomUUID();
+  // .trim() the identity values: a stray trailing space pasted into ISSUER_ISS / ISSUER_LIST_ID env
+  // otherwise lands in `iss`/`kid` and every grant's status.uri — and `iss` is a schema `format: uri`,
+  // so a trailing space makes Bridle reject every grant with grant-schema-invalid.
+  const iss = (opts?.iss ?? process.env.ISSUER_ISS ?? "https://issuer.example.org/h2a/issuer").trim();
+  const listId = (opts?.listId ?? process.env.ISSUER_LIST_ID ?? randomUUID()).trim();
   const issuerKid = `${iss}#issuance`; // interim: one key signs both the status list and grant issuance
   const revokedPath = opts?.revokedPath ?? process.env.ISSUER_REVOKED_PATH;
 
