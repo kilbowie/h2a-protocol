@@ -5,7 +5,7 @@ import { gunzipSync } from "node:zlib";
 // package (that independence is the whole point: it must be able to expose a misbehaving one). The
 // conventions are the cross-implementation interop contract: deep-sorted-key JSON, SHA256, ECDSA
 // P-256 (ES256), base64url. They are byte-identical to the issuer service, the subject signer, and
-// Bridle — by specification, not by shared code.
+// an independent implementer — by specification, not by shared code.
 
 export function canonical(obj: unknown): string {
   return JSON.stringify(obj, (_k, v) =>

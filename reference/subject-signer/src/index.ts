@@ -6,7 +6,7 @@ import { createSign, generateKeyPairSync } from "node:crypto";
 // (ADR-004). The real consent-capture ceremony (ADR-007) is a Sprint 6 concern; this is the crypto.
 
 // Deterministic stable stringify (deep-sorted keys) — the cross-implementation interop convention,
-// byte-identical to the issuer service and to Bridle's verifier.
+// byte-identical to the issuer service and to the implementer's verifier.
 function canonical(obj: unknown): string {
   return JSON.stringify(obj, (_k, v) =>
     v && typeof v === "object" && !Array.isArray(v)

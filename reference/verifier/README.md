@@ -53,7 +53,7 @@ The on-wire objects and this binary are unchanged. See `../../spec/adr/ADR-010-t
   "use": { "purpose": "promotional-video", "territory": "GB", "spend": 100 },
   "decision_record": { /* the implementer's signed decision record */ },
   "status_list": { /* the issuer's signed status list, as fetched at decision time */ },
-  "implementer": "bridle"   // optional; else every pinned implementer key is tried
+  "implementer": "example-implementer"   // optional; else every pinned implementer key is tried
 }
 ```
 

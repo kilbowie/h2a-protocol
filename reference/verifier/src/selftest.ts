@@ -37,8 +37,8 @@ function check(cond: boolean, msg: string) {
   if (!cond) { console.error("  x " + msg); failures++; } else console.log("  ok " + msg);
 }
 
-const issuer = kp(), subject = kp(), bridle = kp();
-const ISS = "https://interim-fiduciary.kilbowieconsulting.com/h2a/issuer";
+const issuer = kp(), subject = kp(), implKp = kp();
+const ISS = "https://issuer.example.org/h2a/issuer";
 const SUBJECT_REF = "urn:h2a:subject:jane-actor-001";
 const IDX = 42;
 const now = new Date();
@@ -48,7 +48,7 @@ function makeGrant() {
   const exp = new Date(now.getTime() + 90 * 864e5);
   const base: Record<string, unknown> = {
     h2a_version: "0.1", grant_id: "3f2a1c40-0d1e-4b2a-9c33-8a1b2c3d4e5f", iss: ISS,
-    subject_ref: SUBJECT_REF, grantee_ref: "urn:h2a:grantee:truly-imagined",
+    subject_ref: SUBJECT_REF, grantee_ref: "urn:h2a:grantee:example-operator",
     scope: { purposes: ["promotional-video"], territories: ["GB", "US"], exclusions: ["political"] },
     status: { uri: `${ISS}/status/list`, mirrors: [], index: IDX },
     revocation_horizon: "PT30M", alg: "ES256", signatures: [] as unknown[],
@@ -75,7 +75,7 @@ function makeRecord(decision: string, reason: string) {
     decision, reason_code: reason, signature_state: "verified", measured_latency_ms: 0,
     non_conformant_transmission: null, created_at: iso(now), alg: "ES256", signature: "",
   };
-  rec.signature = signObject(bridle.priv, rec);
+  rec.signature = signObject(implKp.priv, rec);
   return rec;
 }
 
@@ -97,7 +97,7 @@ function makeAnchor(headHash: string, seq: number, opts: { forgeTimestamp?: bool
 const anchors: Anchors = {
   issuers: { [ISS]: { public_key_pem: issuer.pub } },
   subjects: { [SUBJECT_REF]: { public_key_pem: subject.pub } },
-  implementers: { bridle: { public_key_pem: bridle.pub } },
+  implementers: { "example-implementer": { public_key_pem: implKp.pub } },
   timestamp_authorities: { [TSA_ID]: { public_key_pem: tsa.pub, qualified: false } },
   witnesses: { [WITNESS_ID]: { public_key_pem: witnessKp.pub } },
 };
@@ -105,17 +105,17 @@ const use = { purpose: "promotional-video", territory: "GB", spend: 100 };
 
 console.log("1. honest PERMIT bundle");
 {
-  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "bridle" };
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "example-implementer" };
   const r = verifyBundle(b, anchors, now);
   check(r.ok, "verifies as honest");
   check(r.conformance_observed === "L2", "conformance observed = L2");
   check(r.rederived.decision === "PERMITTED_CONFORMANT", "independent re-derivation = PERMITTED_CONFORMANT");
-  check(r.implementer_key === "bridle", "record attributed to pinned implementer key 'bridle'");
+  check(r.implementer_key === "example-implementer", "record attributed to pinned implementer key 'example-implementer'");
 }
 
 console.log("2. honest REVOKED bundle (revoked, and the record says so)");
 {
-  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("REFUSED_REVOKED", "asset-revoked"), status_list: makeStatusList(new Set([IDX])), implementer: "bridle" };
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("REFUSED_REVOKED", "asset-revoked"), status_list: makeStatusList(new Set([IDX])), implementer: "example-implementer" };
   const r = verifyBundle(b, anchors, now);
   check(r.ok, "verifies as honest (revocation correctly reflected)");
   check(r.rederived.decision === "REFUSED_REVOKED", "independent re-derivation = REFUSED_REVOKED");
@@ -123,7 +123,7 @@ console.log("2. honest REVOKED bundle (revoked, and the record says so)");
 
 console.log("3. LYING implementer (asset revoked, but record claims PERMITTED) — must be caught");
 {
-  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set([IDX])), implementer: "bridle" };
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set([IDX])), implementer: "example-implementer" };
   const r = verifyBundle(b, anchors, now);
   check(!r.ok, "NOT verified — the lie is caught");
   check(r.checks.some((c) => c.id === "decision.consistency" && c.status === "fail"), "decision.consistency fails");
@@ -133,7 +133,7 @@ console.log("4. tampered grant (scope changed after signing)");
 {
   const g = makeGrant() as any;
   g.scope.purposes = ["hostile-deepfake"];
-  const b: Bundle = { grant: g, use: { ...use, purpose: "hostile-deepfake" }, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "bridle" };
+  const b: Bundle = { grant: g, use: { ...use, purpose: "hostile-deepfake" }, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "example-implementer" };
   const r = verifyBundle(b, anchors, now);
   check(!r.ok, "NOT verified — grant signatures fail");
   check(r.checks.some((c) => c.id === "grant.consent_signature" && c.status === "fail"), "consent signature fails");
@@ -142,7 +142,7 @@ console.log("4. tampered grant (scope changed after signing)");
 console.log("5. issuer not in the pinned anchor set");
 {
   const empty: Anchors = { issuers: {}, subjects: anchors.subjects, implementers: anchors.implementers };
-  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "bridle" };
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "example-implementer" };
   const r = verifyBundle(b, empty, now);
   check(!r.ok, "NOT verified — unpinned issuer namespace is untrusted");
   check(r.checks.some((c) => c.id === "grant.issuance_signature" && c.status === "fail"), "issuance signature fails (no anchor)");
@@ -151,7 +151,7 @@ console.log("5. issuer not in the pinned anchor set");
 console.log("6. honest ANCHORED bundle (external timestamp + independent witness) → L3");
 {
   const HEAD = "a".repeat(64);
-  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "bridle", anchor: makeAnchor(HEAD, 7) as any };
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "example-implementer", anchor: makeAnchor(HEAD, 7) as any };
   const r = verifyBundle(b, anchors, now);
   check(r.ok, "verifies as honest");
   check(r.conformance_observed === "L3", "conformance observed = L3");
@@ -162,7 +162,7 @@ console.log("6. honest ANCHORED bundle (external timestamp + independent witness
 console.log("7. FORGED external timestamp (backdated after signing) — must be caught, drops to L2");
 {
   const HEAD = "b".repeat(64);
-  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "bridle", anchor: makeAnchor(HEAD, 8, { forgeTimestamp: true }) as any };
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "example-implementer", anchor: makeAnchor(HEAD, 8, { forgeTimestamp: true }) as any };
   const r = verifyBundle(b, anchors, now);
   check(!r.ok, "NOT verified — the forged timestamp is caught");
   check(r.checks.some((c) => c.id === "anchoring.eidas_timestamp" && c.status === "fail"), "timestamp check fails");
@@ -173,7 +173,7 @@ console.log("8. anchor from an UNPINNED timestamp authority — untrusted");
 {
   const HEAD = "c".repeat(64);
   const noTsa: Anchors = { ...anchors, timestamp_authorities: {} };
-  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "bridle", anchor: makeAnchor(HEAD, 9) as any };
+  const b: Bundle = { grant: makeGrant() as any, use, decision_record: makeRecord("PERMITTED_CONFORMANT", "in-scope"), status_list: makeStatusList(new Set()), implementer: "example-implementer", anchor: makeAnchor(HEAD, 9) as any };
   const r = verifyBundle(b, noTsa, now);
   check(!r.ok, "NOT verified — unpinned TSA is untrusted");
   check(r.checks.some((c) => c.id === "anchoring.eidas_timestamp" && c.status === "fail"), "timestamp check fails (no anchor)");

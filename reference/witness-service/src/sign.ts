@@ -1,7 +1,7 @@
 import { createSign } from "node:crypto";
 
 // Canonicalisation must be byte-identical to every other H2A signer (issuer service, subject signer,
-// Bridle, the verifier): deep-sorted-key JSON, SHA256, ECDSA P-256 (ES256), DER, base64url. That the
+// the implementer, the verifier): deep-sorted-key JSON, SHA256, ECDSA P-256 (ES256), DER, base64url. That the
 // witness shares no code with them — only this convention — is the point: independence.
 export function canonical(obj: unknown): string {
   return JSON.stringify(obj, (_k, v) =>

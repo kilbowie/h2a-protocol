@@ -181,7 +181,7 @@ export function verifyBundle(bundle: Bundle, anchors: Anchors, now = new Date())
   add("decision.consistency", "L1", consistent ? "pass" : "fail",
     consistent ? `independent re-derivation agrees: ${rd.decision}` : `record claims ${recDecision} but independent re-derivation gives ${rd.decision}`);
 
-  // --- L3: external anchoring of the audit head (ADR-005) — an external timestamp Bridle cannot forge
+  // --- L3: external anchoring of the audit head (ADR-005) — an external timestamp the implementer cannot forge
   // plus an independent witness co-signature. When no anchor is in the bundle, L3 is not evaluated (the
   // bundle is at most L2). Note: this verifies the ANCHOR is valid and internally consistent; binding a
   // specific record to the anchored head via an inclusion proof is a documented follow-on. ---

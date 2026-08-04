@@ -38,4 +38,4 @@ By default the signing key and list id are generated **per process** (a restart 
 > This env-loaded key is the **interim** stand-in. Genuine fiduciary custody — a KMS key policy the
 > implementer cannot reach, held in the fiduciary's own trust domain (ADR-001) — is the follow-on. The
 > authority is the key, not the code; that is the point. A container image lives in `./Dockerfile`, and
-> the full hosted topology is in `bridle/deploy/RUNBOOK.md`.
+> the full hosted topology is a matter for the implementer's own deployment runbook.

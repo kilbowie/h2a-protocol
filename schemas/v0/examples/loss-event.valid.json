@@ -10,6 +10,6 @@
   "exposure_at_risk": { "amount": 1000, "currency": "GBP" },
   "remedy_triggered": true,
   "root_cause": "status-list fetch latency spike under peak load",
-  "remediation_ref": "ticket:BRIDLE-1421",
+  "remediation_ref": "ticket:EXAMPLE-1421",
   "occurred_at": "2026-07-19T09:14:22Z"
 }
