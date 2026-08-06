@@ -11,8 +11,9 @@ trust model.
 ## Layout
 ```
 spec/            SPEC-CORE, SPEC-MEDIA, SPEC-MEMORY, SPEC-COMMERCIAL, CONFORMANCE, THREAT-MODEL
-spec/adr/        ADR-001 … ADR-012 (locked decisions)
+spec/adr/        ADR-001 … ADR-014 (locked decisions; 013 is reserved for executor tiers)
 schemas/v0/      8 JSON Schemas (Draft 2020-12) + examples/ (positive + negative)
+interop/         normative ADR-014 canonicalisation + signature vectors, and their generator
 reference/       runnable reference verifier (h2a_ref) — the executable spec
   verifier/        zero-dependency TS verifier + selftest
   issuer-service/  reference issuer / status service — the revocation authority (ADR-009)

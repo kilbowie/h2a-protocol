@@ -1,0 +1,4 @@
+# sha256 of the normative vector file. S1.X1 vendors interop/vectors/ into three CIs by this
+# digest, so a silent edit to the vectors fails every downstream build rather than passing them.
+#   sha256sum -c VECTORS.sha256      (run from interop/vectors/)
+6454005ee422073c7d3abf9d0309682cd32358956442fc9ec11e094b5d883436  vectors.json

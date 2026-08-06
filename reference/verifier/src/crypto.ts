@@ -2,10 +2,26 @@ import { createVerify } from "node:crypto";
 import { gunzipSync } from "node:zlib";
 
 // The verifier re-implements the H2A crypto conventions from scratch — it depends on NO implementer
-// package (that independence is the whole point: it must be able to expose a misbehaving one). The
-// conventions are the cross-implementation interop contract: deep-sorted-key JSON, SHA256, ECDSA
-// P-256 (ES256), base64url. They are byte-identical to the issuer service, the subject signer, and
-// an independent implementer — by specification, not by shared code.
+// package (that independence is the whole point: it must be able to expose a misbehaving one), and
+// it stays zero-dependency for the same reason. The conventions are the cross-implementation interop
+// contract, and they are now written down: **ADR-014** makes RFC 8785 JCS the normative canonical
+// form and `alg:"ES256"` the JOSE raw R‖S encoding, with `interop/vectors/vectors.json` as normative
+// test data.
+//
+// ⚠️ THIS FILE DOES NOT YET CONFORM TO ADR-014. Ported in S1.P3; until then, stated plainly:
+//
+//   - `canonical()` below sorts with `localeCompare`, which is locale-collated. RFC 8785 §3.2.3
+//     requires UTF-16 code units compared as unsigned integers, "independent of locale settings".
+//     It also rebuilds a JavaScript object, which silently re-orders integer-like keys to the front
+//     and discards the sort. It fails interop vectors 04, 05 and 09.
+//   - `createVerify(...).verify()` accepts DER, and rejects the fixed-width R‖S encoding that
+//     `alg:"ES256"` actually denotes (RFC 7518 §3.4). A conforming signer is rejected today.
+//
+// The comment this replaced claimed the output was "byte-identical to the issuer service, the
+// subject signer, and an independent implementer — by specification, not by shared code". That was
+// false when written: there was no specification to be identical by, and measurement on 5 August
+// 2026 found four canonicalisers and two signature encodings across the estate. ADR-014 supplies the
+// specification; S1.X1 supplies the CI job that makes the claim checkable instead of asserted.
 
 export function canonical(obj: unknown): string {
   return JSON.stringify(obj, (_k, v) =>

@@ -11,8 +11,13 @@ legalcode was retrieved from creativecommons.org on the closing date. Do not han
 if either file is ever regenerated — retrieve the canonical original. Full statement and
 attribution wording: [`NOTICE.md`](NOTICE.md).
 
-**Decisions.** Recorded as ADRs under `spec/adr/` (ADR-001 … ADR-012), published at
-[h2a-protocol.org/decisions.html](https://h2a-protocol.org/decisions.html).
+**Decisions.** Recorded as ADRs under `spec/adr/` (ADR-001 … ADR-014), published at
+[h2a-protocol.org/decisions.html](https://h2a-protocol.org/decisions.html). ADR-013 is reserved for
+executor tiers and is not yet written; the gap is deliberate, not a missing file.
+
+**Normative test data.** ADR-014 makes `interop/vectors/vectors.json` normative: an implementation is
+conformant if and only if it reproduces every vector byte-for-byte. Prose describes the canonical
+form; the vectors decide it.
 
 **Authorship.** H2A was authored by **Kilbowie** and is offered as a neutral, proposed open standard;
 it privileges no implementation and names no operator, implementer, or vendor in its trust model.
