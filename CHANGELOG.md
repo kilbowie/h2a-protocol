@@ -5,6 +5,44 @@ draft**, so entries are dated rather than version-tagged; per-document versions 
 are noted where they change. New changes go at the **top**, under the current date. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com).
 
+## 2026-08-06
+
+### ADR-014 — canonical form and signature encoding (normative)
+- **[ADR-014](spec/adr/ADR-014-canonical-form.md) is Accepted.** RFC 8785 JCS is the normative
+  canonical form for every H2A signature and hash, and `alg: "ES256"` denotes the JOSE fixed-width
+  raw R‖S encoding — 64 bytes, never DER.
+- **Why it was needed.** Measurement on 5–6 August 2026 found **four canonicalisers and two
+  signature encodings** across implementations that each believed they agreed with the others. The
+  two non-conforming ones are wrong in *disjoint* ways — the TypeScript hand-roll sorts with
+  `localeCompare` but serialises correctly; the Python reference sorts correctly but escapes
+  non-ASCII and emits `500.0` for `500`. Both therefore agree with JCS, and with each other, on the
+  payloads people test with. They diverge on a performer's name carrying a diacritic and on a lease
+  cap authored as a decimal.
+- **The signature split is total, not partial.** A DER-defaulted verifier rejects a conforming ES256
+  signature, and a conforming verifier rejects every signature the estate has ever written. The
+  acceptance matrix is committed alongside the vectors.
+- **[`interop/vectors/`](interop/) is normative test data**, not illustration. Nine canonicalisation
+  vectors plus signature vectors; an implementation is conformant if and only if it reproduces every
+  one byte-for-byte. Vector `01` is RFC 8785's own published sample, and the generator refuses to
+  emit unless its canonicaliser reproduces that sample exactly — so the file is anchored to the RFC
+  rather than to any single library.
+- **The vectors' own claims are executed.** Each vector records which non-conforming implementation
+  it detects; `verify-catches.mjs` and `verify_catches.py` assert those claims are exactly true, so
+  a vector cannot silently stop testing what it names. This caught a real defect during authoring: a
+  vector for `500.0` had been neutered because `JSON.stringify` normalised the value to `500` when
+  writing the manifest. Inputs are now carried as authored text.
+
+### Corrections to published facts
+- **The published decisions table stopped at ADR-009.** ADR-010, ADR-011 and ADR-012 have existed
+  since 2026-07-19 and were building into the site as pages that nothing linked to. The 2026-08-05
+  entry below corrected the ADR *count* in README and GOVERNANCE but not this table, which is the
+  public-facing one. All are now listed, with ADR-013 shown as deliberately reserved.
+- **`reference/verifier/src/crypto.ts` claimed its output was *"byte-identical to the issuer service,
+  the subject signer, and an independent implementer — by specification, not by shared code."*** That
+  was false when written: there was no specification to be identical by, and the file diverges from
+  JCS on three of the nine interop vectors. The comment now states the non-conformance plainly and
+  cites ADR-014; the code is ported in a follow-up.
+
 ## 2026-08-05
 
 ### Licensing — gate G2 closed

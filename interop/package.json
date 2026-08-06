@@ -1,0 +1,14 @@
+{
+  "name": "@h2a/interop-vectors",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Generator for the normative ADR-014 canonicalisation and signature-encoding vectors. Not published; the vectors themselves are the artifact.",
+  "scripts": {
+    "generate": "node generate.mjs",
+    "check": "node generate.mjs --check"
+  },
+  "dependencies": {
+    "canonicalize": "^2.0.0"
+  }
+}

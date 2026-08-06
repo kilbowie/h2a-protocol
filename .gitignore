@@ -1,6 +1,14 @@
 site/_out/
 dist/
 node_modules/
+
+# tsc emits .js beside the .ts when no outDir is set, so a bare `tsc` in any reference service
+# scatters build output through src/. Eight such files were sitting untracked in reference/ when
+# ADR-014 landed. The same class of defect had already shipped in Bridle, where `tsc -b` exited 0
+# while emitting 26 .js files into packages/*/src and producing no dist/ at all.
+reference/*/src/*.js
+reference/*/src/*.d.ts
+reference/*/src/*.js.map
 __pycache__/
 *.pyc
 .DS_Store
