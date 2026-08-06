@@ -9,3 +9,6 @@ __pycache__/
 .env
 .env.*
 !.env.example
+
+# Personal editor workspace files (machine-specific folder paths).
+*.code-workspace

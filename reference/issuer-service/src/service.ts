@@ -24,14 +24,14 @@ export interface IssuerService {
 // The revocation authority. Holds the private signing key; nobody else can produce a valid list.
 //
 // Key/list custody (durable vs ephemeral). By default (nothing set) the signing key and listId are
-// generated PER PROCESS — a restart changes the trust anchor Bridle pinned at boot, and every prior
+// generated PER PROCESS — a restart changes the trust anchor the implementer pinned at boot, and every prior
 // `status.uri` 404s. That is fine for a driven local demo but NOT for a hosted deployment. For a stable
 // deployment, set (mirroring the witness's WITNESS_SIGNING_KEY):
 //   ISSUER_SIGNING_KEY  — a durable EC P-256 PKCS8 PEM (the whole authority; keep it a real secret)
 //   ISSUER_LIST_ID      — a stable status-list id, so published `status.uri`s survive restarts
 //   ISSUER_ISS          — the issuer namespace (default kept for local/interop; override in prod)
 //   ISSUER_REVOKED_PATH — optional JSON file (on a persistent volume) so live revokes survive a restart
-// Real fiduciary custody (a KMS the Bridle deployment cannot reach) is the follow-on — see RUNBOOK §1.
+// Real fiduciary custody (a KMS the implementer deployment cannot reach) is the follow-on — see RUNBOOK §1.
 export function buildIssuerService(opts?: {
   token?: string;
   iss?: string;
@@ -42,7 +42,7 @@ export function buildIssuerService(opts?: {
   const token = opts?.token ?? process.env.FIDUCIARY_TOKEN ?? "dev-secret";
   // .trim() the identity values: a stray trailing space pasted into ISSUER_ISS / ISSUER_LIST_ID env
   // otherwise lands in `iss`/`kid` and every grant's status.uri — and `iss` is a schema `format: uri`,
-  // so a trailing space makes Bridle reject every grant with grant-schema-invalid.
+  // so a trailing space makes the implementer reject every grant with grant-schema-invalid.
   const iss = (opts?.iss ?? process.env.ISSUER_ISS ?? "https://issuer.example.org/h2a/issuer").trim();
   const listId = (opts?.listId ?? process.env.ISSUER_LIST_ID ?? randomUUID()).trim();
   const issuerKid = `${iss}#issuance`; // interim: one key signs both the status list and grant issuance

@@ -5,6 +5,49 @@ draft**, so entries are dated rather than version-tagged; per-document versions 
 are noted where they change. New changes go at the **top**, under the current date. Format loosely
 follows [Keep a Changelog](https://keepachangelog.com).
 
+## 2026-08-05
+
+### Licensing — gate G2 closed
+- **The repository is now licensed.** It previously had no `LICENSE` file at all, which under
+  copyright law means *all rights reserved* — while `POSITIONING.md:24` called the spec
+  *"Open — published, free to implement"* and promised a patent non-assert. `spec/**` (including
+  all ADRs) is **CC BY 4.0** ([`spec/LICENSE`](spec/LICENSE)); everything else — schemas,
+  reference code, scripts, site — is **Apache-2.0** ([`LICENSE`](LICENSE)). Both are canonical
+  texts, unmodified. Rationale and attribution wording: [`NOTICE.md`](NOTICE.md).
+
+### Corrections to published facts
+- **ADR count.** README and GOVERNANCE said *"ADR-001 … ADR-009"*. There are **twelve** — ADR-010
+  (trust-anchor governance), ADR-011 (commercial model) and ADR-012 (exposure fields as an optional
+  profile) have existed since 2026-07-19 and were absent from both counts.
+- **Schema count.** README said *"6 JSON Schemas"*. There are **eight**: the four core objects plus
+  `h2a-commercial.profile`, `h2a-media.profile`, `h2a-memory.profile` and `h2a-loss-event`.
+- **Layout block.** README listed only `issuer-service` under `reference/`; the `verifier`,
+  `subject-signer` and `witness-service` components were undocumented, as was `SPEC-COMMERCIAL.md`
+  and the `check-interop.py` CI gate.
+
+### Neutrality — scope of the 2026-07-18 claim corrected
+The entry dated **2026-07-18** below states that references to specific commercial actors *"were
+removed from the spec, ADRs, schemas, reference code, and site."* **That was not accurate for any of
+those categories except the site.** As of this entry it is now true of **reference code and
+schemas**, and remains **not true of the ADRs**:
+
+- Removed from reference code and fixtures: the founder-operated issuer namespace and a named
+  operator/implementer in `reference/verifier/{src/selftest.ts, src/crypto.ts, src/verify.ts,
+  anchors.example.json, README.md}`, `reference/issuer-service/{src/service.ts, README.md}`,
+  `reference/subject-signer/src/index.ts`, `reference/witness-service/src/sign.ts`, and
+  `schemas/v0/examples/loss-event.valid.json`. These now use RFC 2606 reserved-namespace examples
+  (`issuer.example.org`, `urn:h2a:grantee:example-operator`, implementer id `example-implementer`).
+  The verifier selftest was re-run after the rename: **21 assertions, 0 failures.**
+- **Still naming a specific implementer: `spec/adr/ADR-005:38`, `ADR-010:12,36`,
+  `ADR-011:5,8,49,55`, `ADR-012:4`.** These are left in place deliberately and are not an
+  oversight. `ADR-010:36` is a *disclosure* — it records that the interim issuer namespace is
+  founder-operated, which is the honest statement the ADR exists to make, and deleting it would
+  make the document less truthful, not more neutral. `ADR-011` and `ADR-012` cite a specific
+  implementer's internal documents as their **source of record**, so removing the names would
+  destroy traceability rather than establish neutrality. Whether a neutral standard can cite one
+  implementer's private docs as an ADR's source of record is a real governance question; it is
+  recorded here as open rather than resolved by a find-and-replace.
+
 ## 2026-07-19
 
 ### Commercial profile (optional, non-Core)

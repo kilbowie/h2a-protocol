@@ -10,12 +10,15 @@ trust model.
 
 ## Layout
 ```
-spec/            SPEC-CORE, SPEC-MEDIA, SPEC-MEMORY, CONFORMANCE, THREAT-MODEL
-spec/adr/        ADR-001 … ADR-009 (locked decisions)
-schemas/v0/      6 JSON Schemas (Draft 2020-12) + examples/ (positive + negative)
+spec/            SPEC-CORE, SPEC-MEDIA, SPEC-MEMORY, SPEC-COMMERCIAL, CONFORMANCE, THREAT-MODEL
+spec/adr/        ADR-001 … ADR-012 (locked decisions)
+schemas/v0/      8 JSON Schemas (Draft 2020-12) + examples/ (positive + negative)
 reference/       runnable reference verifier (h2a_ref) — the executable spec
+  verifier/        zero-dependency TS verifier + selftest
   issuer-service/  reference issuer / status service — the revocation authority (ADR-009)
-scripts/         validate-schemas.py, check-reference.py (CI gates)
+  subject-signer/  reference subject/custodian signer
+  witness-service/ reference independent witness
+scripts/         validate-schemas.py, check-reference.py, check-interop.py (CI gates)
 site/            static site generator -> h2a-protocol.org (build.py, content/, CNAME)
 .github/         Pages workflow: validate -> check reference -> build -> deploy
 CHANGELOG.md     notable changes, published at h2a-protocol.org/changelog
@@ -39,5 +42,8 @@ python site/build.py                       # -> site/_out
 3. Settings → Pages → Source: **GitHub Actions**. Push to `main` runs validate → build → deploy. Enforce HTTPS after the cert issues.
 4. Branch protection on `main`: require the Pages workflow green.
 
+## Licensing
+`spec/**` (including all ADRs) is **CC BY 4.0** — [`spec/LICENSE`](spec/LICENSE). Everything else — schemas, reference code, scripts, site — is **Apache-2.0** — [`LICENSE`](LICENSE). Both texts are the canonical originals, unmodified. Attribution wording and the rationale for the split are in [`NOTICE.md`](NOTICE.md).
+
 ## Open gates
-See `GOVERNANCE.md`: **G1** identity namespace root (pick the interim production namespace before issuing real grants), **G2** licensing (add via GitHub picker), **G4** versioning promise. Licensing: spec = CC BY 4.0, everything else = Apache-2.0.
+See `GOVERNANCE.md`: **G1** identity namespace root (pick the interim production namespace before issuing real grants), **G4** versioning promise. **G2 (licensing) is closed** as of 5 August 2026.

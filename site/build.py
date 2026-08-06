@@ -77,6 +77,7 @@ PAGES = [
     (SPEC / "SPEC-CORE.md", "spec-core.html", "Spec"),
     (SPEC / "SPEC-MEDIA.md", "spec-media.html", ""),
     (SPEC / "SPEC-MEMORY.md", "spec-memory.html", ""),
+    (SPEC / "SPEC-COMMERCIAL.md", "spec-commercial.html", ""),
     (SPEC / "CONFORMANCE.md", "conformance.html", "Conformance"),
     (SPEC / "THREAT-MODEL.md", "threat-model.html", ""),
     (CONTENT / "schemas.md", "schemas.html", "Schemas"),

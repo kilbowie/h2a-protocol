@@ -1,10 +1,10 @@
 {
   "_comment": "Trust anchors are pinned by the operator running the verifier — the implementer being checked never supplies them (ADR-010). Keys are matched by issuer NAMESPACE (grant.iss). Today the issuer namespace is founder-operated; the future change is only WHERE it resolves and WHO governs this file, not the verifier.",
   "issuers": {
-    "https://interim-fiduciary.kilbowieconsulting.com/h2a/issuer": {
+    "https://issuer.example.org/h2a/issuer": {
       "public_key_pem": "-----BEGIN PUBLIC KEY-----\n<issuer status-list + issuance key>\n-----END PUBLIC KEY-----\n",
       "custodian": "founder-operated (interim) — moves to a rights-holder fiduciary; see ADR-010",
-      "endpoint": "https://interim-fiduciary.kilbowieconsulting.com/pubkey"
+      "endpoint": "https://issuer.example.org/pubkey"
     }
   },
   "subjects": {
@@ -13,9 +13,9 @@
     }
   },
   "implementers": {
-    "bridle": {
-      "public_key_pem": "-----BEGIN PUBLIC KEY-----\n<Bridle evidence-signing key — the party being checked>\n-----END PUBLIC KEY-----\n",
-      "endpoint": "https://api.kilbowieconsulting.com/v0/pubkey"
+    "example-implementer": {
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\n<implementer evidence-signing key — the party being checked>\n-----END PUBLIC KEY-----\n",
+      "endpoint": "https://api.example.org/v0/pubkey"
     }
   },
   "_comment_l3": "L3 anchoring (ADR-005). Pinned by the authority/witness names carried in an anchor (GET /v0/anchor-keys). `qualified:true` asserts the TSA certificate is eIDAS-qualified — the interim reference TSA is NOT qualified, so it is pinned qualified:false and reaches L3-interim only.",
