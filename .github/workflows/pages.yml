@@ -1,5 +1,10 @@
 name: Build & deploy H2A site
 on:
+  # Every gate below ran ONLY after merge until 2026-08-07, so a pull request could not be
+  # validated before it landed. That is how the S1.P3 merge broke `main`: the port was correct,
+  # a test fixture in scripts/ still signed DER, and nothing checked the PR. The gates were
+  # already good; they were simply pointed at the wrong moment.
+  pull_request:
   push: { branches: [main] }
   workflow_dispatch:
 permissions:
@@ -7,7 +12,9 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  # Per-ref, not a single global `pages` group — otherwise two open pull requests cancel each
+  # other's checks and whichever loses the race reports no result at all.
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -63,6 +70,9 @@ jobs:
         with: { path: site/_out }
   deploy:
     needs: build
+    # Pull requests run every gate but publish nothing — a proposed change must not be able to
+    # replace the live site before it is merged.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
