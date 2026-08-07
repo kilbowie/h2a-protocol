@@ -1,11 +1,16 @@
-import { createSign, generateKeyPairSync } from "node:crypto";
+import { sign as cryptoSign, generateKeyPairSync } from "node:crypto";
 import { gzipSync } from "node:zlib";
-import { canonical } from "./crypto.js";
+import { jcsBytes } from "./jcs.js";
 import { verifyBundle, type Anchors, type Bundle } from "./verify.js";
 
 // Proves the verifier end-to-end with freshly generated keys and REAL signatures — no implementer
-// code involved. The signing here mirrors the H2A conventions (the interop contract), so a green
+// code involved. The signing here follows ADR-014 (RFC 8785 JCS, ES256 as raw R‖S), so a green
 // selftest means the verifier agrees with any conformant signer.
+//
+// Note what this file can and cannot prove. It signs and verifies with the SAME jcs.ts, so it
+// would stay green even if that file were wrong — a closed loop agreeing with itself is what let
+// four canonicalisers drift apart while every selftest in the estate passed. The check that the
+// canonicalisation is CORRECT lives in scripts/check-jcs.py, against the normative vectors.
 
 function kp() {
   const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "P-256" });
@@ -17,14 +22,17 @@ function kp() {
 function signDetached(priv: string, obj: Record<string, unknown>): string {
   const { signatures, ...rest } = obj as { signatures?: unknown };
   void signatures;
-  const s = createSign("SHA256"); s.update(canonical(rest)); s.end();
-  return s.sign(priv).toString("base64url");
+  return raw(priv, rest);
 }
 function signObject(priv: string, obj: Record<string, unknown>): string {
   const { signature, ...rest } = obj as { signature?: unknown };
   void signature;
-  const s = createSign("SHA256"); s.update(canonical(rest)); s.end();
-  return s.sign(priv).toString("base64url");
+  return raw(priv, rest);
+}
+function raw(priv: string, payload: unknown): string {
+  return cryptoSign("sha256", jcsBytes(payload), {
+    key: priv, dsaEncoding: "ieee-p1363",
+  }).toString("base64url");
 }
 function encodeBitstring(revoked: Set<number>): string {
   const bytes = Buffer.alloc(1024 / 8);

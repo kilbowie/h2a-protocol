@@ -1,19 +1,18 @@
-import { createSign, generateKeyPairSync } from "node:crypto";
+import { sign as cryptoSign, generateKeyPairSync } from "node:crypto";
+import { jcsBytes } from "./jcs.js";
 
 // Reference "subject signer" — stands in for the performer's own device during a consent ceremony.
 // It is deliberately self-contained: a subject does NOT depend on the issuer's code or keys. It holds
 // its OWN private key and produces only the `consent` half of a grant's two detached signatures
 // (ADR-004). The real consent-capture ceremony (ADR-007) is a Sprint 6 concern; this is the crypto.
 
-// Deterministic stable stringify (deep-sorted keys) — the cross-implementation interop convention,
-// byte-identical to the issuer service and to the implementer's verifier.
-function canonical(obj: unknown): string {
-  return JSON.stringify(obj, (_k, v) =>
-    v && typeof v === "object" && !Array.isArray(v)
-      ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)))
-      : v,
-  );
-}
+// ADR-014. Canonicalisation is RFC 8785 JCS (jcs.ts, byte-identical across every reference
+// component) and signatures are ES256 as RFC 7518 §3.4 defines it — raw R‖S, never DER.
+//
+// This matters more here than anywhere else in the repo. A consent signature is the performer
+// saying yes, and it is the one signature no one else can reproduce. If the subject's device
+// canonicalises differently from the issuer, the consent signature fails to verify against the
+// grant it was given for — and the failure looks identical to a forged consent.
 
 export interface SubjectKeypair {
   privateKeyPem: string;
@@ -39,8 +38,9 @@ export function signConsent(
 ): { role: "consent"; kid: string; value: string } {
   const { signatures, ...rest } = grant as { signatures?: unknown };
   void signatures;
-  const s = createSign("SHA256");
-  s.update(canonical(rest));
-  s.end();
-  return { role: "consent", kid: key.kid, value: s.sign(key.privateKeyPem).toString("base64url") };
+  const value = cryptoSign("sha256", jcsBytes(rest), {
+    key: key.privateKeyPem,
+    dsaEncoding: "ieee-p1363",
+  }).toString("base64url");
+  return { role: "consent", kid: key.kid, value };
 }

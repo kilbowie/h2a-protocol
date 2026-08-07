@@ -19,13 +19,22 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.exceptions import InvalidSignature
 
+from .jcs import jcs_bytes, looks_like_der, raw_to_der, der_to_raw
+
 H2A_VERSION = "0.1"
 
 
 # ---------- canonicalisation & signatures ----------
 
 def canonical(obj: dict) -> bytes:
-    return json.dumps(obj, sort_keys=True, separators=(",", ":")).encode()
+    """RFC 8785 JCS bytes — ADR-014.
+
+    Was `json.dumps(sort_keys=True)`, which escaped every non-ASCII character (ensure_ascii
+    defaults to True) and emitted Python float reprs: `500.0` rather than `500`. Both produce
+    bytes no conformant implementation can reproduce, on payloads as ordinary as a performer's
+    name. Ordering was already right; nothing else was.
+    """
+    return jcs_bytes(obj)
 
 
 def signing_bytes(grant: dict) -> bytes:
@@ -36,11 +45,19 @@ def signing_bytes(grant: dict) -> bytes:
 
 
 def verify_sig(pub: ec.EllipticCurvePublicKey, payload: bytes, sig_b64u: str) -> bool:
+    """Verify an ES256 signature — raw R‖S only (ADR-014 §2, RFC 7518 §3.4).
+
+    DER is REFUSED rather than transparently accepted. A verifier that takes both encodings cannot
+    tell a conformant signer from one that ignored the ADR, and being able to make exactly that
+    distinction is what a reference verifier is for (ADR-006).
+    """
     try:
-        sig = base64.urlsafe_b64decode(sig_b64u + "==")
-        pub.verify(sig, payload, ec.ECDSA(hashes.SHA256()))
+        sig = base64.urlsafe_b64decode(sig_b64u + "=" * (-len(sig_b64u) % 4))
+        if looks_like_der(sig):
+            return False
+        pub.verify(raw_to_der(sig), payload, ec.ECDSA(hashes.SHA256()))
         return True
-    except (InvalidSignature, ValueError, Exception):
+    except Exception:
         return False
 
 
