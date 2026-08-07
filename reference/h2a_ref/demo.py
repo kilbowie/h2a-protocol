@@ -20,11 +20,14 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import hashes
 
 from h2a_ref.issue import make_status_list
+from h2a_ref.jcs import der_to_raw
 from h2a_ref.verify import Use, signing_bytes, verify
 
 
 def _sign(priv, payload: bytes) -> str:
-    sig = priv.sign(payload, ec.ECDSA(hashes.SHA256()))
+    # ADR-014 §2 — raw R‖S. `cryptography` signs to DER, so convert at the boundary, before the
+    # signature reaches any H2A document.
+    sig = der_to_raw(priv.sign(payload, ec.ECDSA(hashes.SHA256())))
     return base64.urlsafe_b64encode(sig).decode().rstrip("=")
 
 
