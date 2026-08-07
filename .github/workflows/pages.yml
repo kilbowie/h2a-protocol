@@ -21,14 +21,38 @@ jobs:
         with: { node-version: "20" }
       - name: Install (Python)
         run: pip install -r requirements.txt -r reference/requirements.txt
-      - name: Install (issuer-service)
-        run: npm --prefix reference/issuer-service ci
+      # All four TypeScript components, not just the issuer. Until 2026-08-07 CI installed and
+      # typechecked one of the four, so the verifier — the component whose whole job is to be
+      # trustworthy — was never compiled here at all.
+      - name: Install (TypeScript components)
+        run: |
+          for c in verifier issuer-service subject-signer witness-service; do
+            npm --prefix "reference/$c" ci
+          done
       - name: Validate schemas + examples (gate)
         run: python scripts/validate-schemas.py
       - name: Verify reference implementation (gate)
         run: python scripts/check-reference.py
-      - name: Typecheck issuer-service (gate)
-        run: npm --prefix reference/issuer-service run typecheck
+
+      # --- ADR-014 -----------------------------------------------------------
+      # These two are what stop the canonicalisation split reopening. check-jcs proves every
+      # implementation agrees with the normative vectors and that the duplicated jcs.ts copies are
+      # byte-identical; check-crosslang proves a signature written in one language verifies in the
+      # other, and that DER is refused. The second is not implied by the first: before ADR-014 every
+      # component had a green selftest, because each signed and verified with its own canonicaliser.
+      - name: ADR-014 conformance — vectors + copy identity (gate)
+        run: python scripts/check-jcs.py
+      - name: ADR-014 cross-language — either language verifies the other (gate)
+        run: python scripts/check-crosslang.py
+      - name: Verifier selftest (gate)
+        run: npm --prefix reference/verifier run selftest
+
+      - name: Typecheck TypeScript components (gate)
+        run: |
+          for c in verifier issuer-service subject-signer witness-service; do
+            echo "--- $c"
+            npm --prefix "reference/$c" run typecheck
+          done
       - name: Cross-language interop — TS signs, Python verifies (gate)
         run: |
           npm --prefix reference/issuer-service run emit-interop -- "$RUNNER_TEMP/interop"

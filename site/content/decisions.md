@@ -15,9 +15,20 @@ rule; the ADR states the reasoning and what it cost.
 | [ADR-007](adr-007.html) | Consent-capture ceremony | Accepted |
 | [ADR-008](adr-008.html) | Signing curve | Accepted |
 | [ADR-009](adr-009.html) | Revocation authority sits with the issuer, not the implementer | Accepted — refines ADR-005 and ADR-006 |
+| [ADR-010](adr-010.html) | Trust-anchor governance: pinned by namespace, foundation-bound | Accepted |
+| [ADR-011](adr-011.html) | Commercial model: governed act billed, assurance-priced | Accepted |
+| [ADR-012](adr-012.html) | Exposure fields are an optional profile, never Core | Accepted |
+| ADR-013 | *Reserved — executor tiers T0–T3* | Not yet written |
+| [ADR-014](adr-014.html) | Canonical form and signature encoding | Accepted |
 
-**Most recent.** [ADR-009](adr-009.html) moves revocation authority to the issuer and defines it as
-custody of the status-list signing key: whoever signs the list can publish one with the bit cleared, so
-possession of the key *is* the authority regardless of the org chart. An implementer is fetch-and-verify
-only — it holds the issuer's public key, checks the signature, and fails closed on an unreachable,
-unsigned, wrongly-signed, or stale list. It has no revoke endpoint and serves no list of its own.
+**Most recent.** [ADR-014](adr-014.html) makes **RFC 8785 JCS** the normative canonical form and
+fixes `alg: "ES256"` as the JOSE raw R‖S encoding, never DER. It exists because measurement found
+four canonicalisers and two signature encodings across implementations that all believed they
+agreed — and the two non-conforming ones were wrong in disjoint ways, so each matched the other on
+ordinary payloads and diverged only on real ones: a name carrying a diacritic, a lease cap written
+`500.0` rather than `500`. The ADR ships **normative test data**
+([`interop/vectors/`](https://github.com/kilbowie/h2a-protocol/tree/main/interop)) anchored to
+RFC 8785's own published sample. An implementation is conformant if and only if it reproduces every
+vector byte-for-byte; prose describes the canonical form, the vectors decide it.
+
+ADR-013 is deliberately absent, not missing — it is reserved for the executor-tier decision.

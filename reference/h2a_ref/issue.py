@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec
 
+from h2a_ref.jcs import der_to_raw
 from h2a_ref.verify import H2A_VERSION, bitstring_encode, canonical
 
 # Short TTL: a status list is a perishable claim, not a cached document.
@@ -45,6 +46,7 @@ def make_status_list(status_priv: ec.EllipticCurvePrivateKey, revoked: set[int],
     if mirrors:
         sl["mirrors"] = mirrors
     # The signature covers every field except itself — see verify.verify_status_sig.
-    sig = status_priv.sign(canonical(sl), ec.ECDSA(hashes.SHA256()))
+    # ADR-014 §2 — emit raw R‖S, never the DER that `cryptography` returns.
+    sig = der_to_raw(status_priv.sign(canonical(sl), ec.ECDSA(hashes.SHA256())))
     sl["signature"] = base64.urlsafe_b64encode(sig).decode().rstrip("=")
     return sl

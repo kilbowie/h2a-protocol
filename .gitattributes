@@ -9,3 +9,12 @@
 *.woff2 binary
 *.png   binary
 *.ico   binary
+
+# The ADR-014 interop vectors are normative test data compared byte-for-byte and pinned by committed
+# SHA-256 digests (interop/vectors/VECTORS.sha256). The rules above already check them out as LF, but
+# they do it by normalising — which is a transformation that a future .gitattributes edit, a stray
+# core.autocrlf, or a `git config` on one contributor's machine could change. `-text` disables
+# conversion outright, so these files are the same bytes everywhere by construction rather than by
+# configuration. Listed after the rules above because the last matching pattern wins.
+interop/vectors/**        -text
+interop/vectors/*.txt     -text

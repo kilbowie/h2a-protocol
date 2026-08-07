@@ -1,4 +1,5 @@
-import { canonical, verifyObject, verifyDetached, isRevoked } from "./crypto.js";
+import { verifyObject, verifyDetached, isRevoked } from "./crypto.js";
+import { jcs } from "./jcs.js";
 
 // h2a-verify — the standalone, independent verifier.
 //
@@ -35,7 +36,7 @@ interface Grant {
 }
 
 // An external anchor of the implementer's audit head (ADR-005 / L3). Both the timestamp token and the
-// witness co-signature carry a singular `signature` over canonical(object minus signature) — the same
+// witness co-signature carry a singular `signature` over jcs(object minus signature) — the same
 // convention as every other H2A object — so verifyObject checks them with no implementer code.
 export interface Anchor {
   seq: number;

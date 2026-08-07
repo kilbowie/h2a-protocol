@@ -1,0 +1,16 @@
+{
+  "h2a": "0.1",
+  "grant_id": "urn:uuid:0f9b1e3a-5c47-4a1e-9d0b-2c8f4a6b1d23",
+  "iss": "https://issuer.example.org/h2a/issuer",
+  "subject_ref": "did:example:José-Muñoz",
+  "grantee_ref": "urn:example:operator:acme",
+  "nbf": "2026-08-06T00:00:00Z",
+  "exp": "2027-08-06T00:00:00Z",
+  "Use": ["advertising"],
+  "use": ["advertising", "editorial"],
+  "territory": ["GLOBAL"],
+  "lease": {"cap": 500.0, "currency": "GBP"},
+  "exclusions": [],
+  "status": {"type": "BitstringStatusListEntry", "index": 1024,
+             "uri": "https://issuer.example.org/h2a/status/1"}
+}
