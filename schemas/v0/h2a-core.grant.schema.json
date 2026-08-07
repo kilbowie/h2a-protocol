@@ -14,6 +14,7 @@
     "scope",
     "status",
     "revocation_horizon",
+    "nbf",
     "alg",
     "signatures",
     "iat",
@@ -106,9 +107,21 @@
     "alg": { "type": "string", "enum": ["ES256", "ES384", "EdDSA"], "default": "ES256", "description": "Signature algorithm. ES256 (P-256) is mandatory-to-implement; curve-agnostic via this header." },
     "signatures": {
       "type": "array",
-      "description": "Two detached signatures (ADR-004): consent (by subject/custodian) and issuance (by issuer). Kept separate so consent and issuance never collapse into one act.",
+      "description": "Two detached signatures (ADR-004): consent (by subject/custodian) and issuance (by issuer). Kept separate so consent and issuance never collapse into one act. Exactly one of each role, enforced below — minItems/maxItems alone admitted two consent signatures and no issuance, which is the collapse this separation exists to prevent.",
       "minItems": 2,
       "maxItems": 2,
+      "allOf": [
+        {
+          "contains": { "properties": { "role": { "const": "consent" } }, "required": ["role"] },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": { "properties": { "role": { "const": "issuance" } }, "required": ["role"] },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ],
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -121,7 +134,7 @@
       }
     },
     "iat": { "type": "string", "format": "date-time" },
-    "nbf": { "type": "string", "format": "date-time" },
+    "nbf": { "type": "string", "format": "date-time", "description": "Not-before. REQUIRED: without it a verifier cannot decide whether the grant is yet in force, so a grant lacking nbf is schema-valid and un-evaluable. Implementations already reject its absence (bridle packages/core/src/verify.ts) — the schema was the one permitting it." },
     "exp": { "type": "string", "format": "date-time" }
   }
 }

@@ -92,7 +92,24 @@ verifier records a `TRANSMITTED_NON_CONFORMANT` Decision Record with a populated
 `non_conformant_transmission` object. This record is the standard's primary output: the
 signed, externally-anchored account a counterparty relies on.
 
-## 7. Anchoring (ADR-005)
+## 7. Attestation (ADR-004)
+
+An implementer **MUST** emit an Attestation for every governed act it permits. An act that was
+permitted but left no Attestation is indistinguishable, to a third party, from an act that never
+happened.
+
+An Attestation **MUST** bind `output_hash` to `grant_id`. The status check it records **MUST** have
+been fresh at the moment of emission: an Attestation carrying a `status_check` older than the
+grant's `revocation_horizon` **MUST NOT** be emitted, and a verifier **MUST** refuse one that is.
+
+An Attestation **SHOULD** record the `use` that was actually checked — the purpose, territory and
+lease spend evaluated at the point of use — and **SHOULD** carry `decision_record_ref` naming the
+Decision Record it was emitted under. An Attestation that does not say which use it attests records
+only that something occurred; it cannot be compared against the grant's scope, so it is a decoration
+rather than evidence. These are SHOULD rather than MUST only because objects predating the fields
+must stay valid; implementations written after v0.2 have no reason to omit them.
+
+## 8. Anchoring (ADR-005)
 
 Decision Records **SHOULD** be anchored with an [RFC 3161](https://www.rfc-editor.org/rfc/rfc3161)
 ([eIDAS](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32014R0910)-qualified) timestamp and
@@ -101,7 +118,7 @@ critical path. No distributed-ledger / blockchain anchoring is used.
 
 <!--DIAGRAM:anchoring-pipeline-->
 
-## 8. Cryptography (ADR-008)
+## 9. Cryptography (ADR-008)
 
 ES256 (ECDSA P-256) is mandatory-to-implement. The `alg` header makes the format curve-agnostic;
 a verifier **MAY** support additional algorithms but **MUST** support ES256.
