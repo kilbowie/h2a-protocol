@@ -37,9 +37,15 @@ def build_grant(now):
     issuer = ec.generate_private_key(ec.SECP256R1())
 
     def sign(priv, payload):
+        # ADR-014 §2 — raw R‖S, never DER. `cryptography` signs to DER, so convert before the
+        # signature reaches the grant. Without der_to_raw this fixture's consent and issuance
+        # signatures are DER, and the now-conformant verifier refuses them: the whole interop
+        # check fails with `consent-signature-invalid` while every status-list assertion passes.
         import base64
+
+        from h2a_ref.jcs import der_to_raw
         return base64.urlsafe_b64encode(
-            priv.sign(payload, ec.ECDSA(hashes.SHA256()))).decode().rstrip("=")
+            der_to_raw(priv.sign(payload, ec.ECDSA(hashes.SHA256())))).decode().rstrip("=")
 
     grant = {
         "h2a_version": "0.1",

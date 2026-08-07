@@ -77,7 +77,8 @@ def main() -> int:
 
     payload = jcs_bytes(doc)
     py_sig_raw = der_to_raw(priv.sign(payload, ec.ECDSA(hashes.SHA256())))
-    py_sig_der = priv.sign(payload, ec.ECDSA(hashes.SHA256()))
+    # Deliberately DER — this is the negative half of the gate. Both verifiers must REFUSE it.
+    py_sig_der = priv.sign(payload, ec.ECDSA(hashes.SHA256()))  # noqa: ADR014-der
 
     print("\nPython signs -> TypeScript verifies")
     ts = subprocess.run(
