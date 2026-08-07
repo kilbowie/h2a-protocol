@@ -95,6 +95,16 @@ def main() -> int:
     check("raw_to_der(raw) == der", raw_to_der(raw) == der)
     check("the committed raw signature verifies", verifies(s["public_key_pem"], s["preimage_canonical"], raw))
 
+    # --- 5. no signing site emits DER --------------------------------------
+    print("\nevery signing site emits raw R‖S")
+    for path, line_no, line in der_emitting_signers():
+        check(f"{path}:{line_no}", False,
+              line.strip()[:120]
+              + "\n  signs to DER. Wrap it: der_to_raw(...) in Python, or pass"
+              + '\n  dsaEncoding: "ieee-p1363" in Node. Add "# noqa: ADR014-der" if the DER is'
+              + "\n  deliberate (a negative test).")
+    check("no unconverted DER signers", not any(True for _ in der_emitting_signers()))
+
     print()
     if failures:
         print(f"FAILED — {len(failures)} check(s): {', '.join(failures[:6])}"
@@ -102,6 +112,38 @@ def main() -> int:
         return 1
     print("ADR-014 conformance: all implementations agree with the normative vectors.")
     return 0
+
+
+def der_emitting_signers():
+    """Yield (path, line_no, line) for every signing call that has not been converted to raw R‖S.
+
+    This exists because the port missed one. Four signing sites in reference/ were converted and a
+    fifth in scripts/ was not — found by CI, after merge, because the sweep that drove the port
+    grepped reference/ and the file lived somewhere else. A guard that greps the WHOLE repository is
+    the only version of that sweep worth trusting.
+
+    `cryptography`'s sign() returns DER and Node's createSign defaults to it, so both are opt-OUT
+    rather than opt-in. That asymmetry is the whole hazard: forgetting the conversion is silent, and
+    produces a signature that looks fine until a conformant counterparty rejects it.
+    """
+    import re
+    py_sign = re.compile(r"\.sign\(")
+    ts_sign = re.compile(r"createSign\(|cryptoSign\(|\bsign\(\"sha256\"")
+    for path in sorted(list(ROOT.glob("scripts/*.py")) + list(ROOT.glob("scripts/*.ts"))
+                       + list(ROOT.glob("reference/**/*.py")) + list(ROOT.glob("reference/*/src/*.ts"))):
+        if "node_modules" in path.parts or path.name == "jcs.py" or path.name == "jcs.ts":
+            continue
+        for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if line.lstrip().startswith(("#", "//", "*")) or "ADR014-der" in line:
+                continue
+            hit = py_sign.search(line) if path.suffix == ".py" else ts_sign.search(line)
+            if not hit:
+                continue
+            # Converted at the call site, or configured to emit raw on the following lines.
+            window = "\n".join(path.read_text(encoding="utf-8").splitlines()[i - 1:i + 3])
+            if "der_to_raw" in window or "ieee-p1363" in window:
+                continue
+            yield path.relative_to(ROOT), i, line
 
 
 def b64u(s: str) -> bytes:
