@@ -118,3 +118,28 @@ sha256sum -c VECTORS.sha256      # from interop/vectors/
 `VECTORS.sha256` exists so a silent edit to the vectors fails every downstream build rather than
 passing them. The vectors are covered by `.gitattributes -text`, so their bytes are identical on
 every platform regardless of Git configuration.
+
+### The pin
+
+Every consuming repository holds a copy of `vectors.json` and runs `scripts/check-vectors-pinned.mjs`
+against it in CI. That script is **byte-identical in h2a-protocol, bridle and hdicr**, and carries
+the pin: the upstream commit and the expected SHA-256. It asserts three things, all hard failures —
+the local copy matches the digest, upstream at the pinned commit matches the digest, and the two are
+byte-identical. An unreachable upstream **fails**; it does not skip.
+
+Without it, each repository validated its canonicaliser against a fixture only it controlled. Edit
+bridle's copy to match a broken bridle canonicaliser and bridle stays green, hdicr stays green, this
+repository stays green, and the estate is quietly back to four canonical forms — the same defect the
+vectors exist to prevent, moved one level up.
+
+**Changing the canonical form is therefore a deliberate three-repository operation:**
+
+1. Edit the vectors here; regenerate `VECTORS.sha256`; commit and merge to `main`.
+2. Take the resulting commit SHA. Update `UPSTREAM_COMMIT` and `EXPECTED_SHA256` in
+   `scripts/check-vectors-pinned.mjs` **in this repository** — its own CI checks the pin, so a stale
+   pin here goes red first.
+3. Re-vendor the fixture and copy the same script, unchanged, into bridle and hdicr.
+
+Each step is a reviewed diff. That cost is intentional: `vectors.json` is normative test data
+(ADR-014 §4), so changing it is a specification change, and a specification change should not be able
+to arrive in three repositories as a silent consequence of a green build.

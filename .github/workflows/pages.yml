@@ -51,6 +51,18 @@ jobs:
         run: python scripts/check-jcs.py
       - name: ADR-014 cross-language — either language verifies the other (gate)
         run: python scripts/check-crosslang.py
+      # S1.X1. The three checks above all read THIS repository's copy of the vectors, so they
+      # prove the four implementations agree with a file this repository controls. bridle and
+      # hdicr vendor their own copies and run the same shape of check against those. Nothing
+      # compared the copies, so all three could drift apart while every suite stayed green —
+      # the same closed-loop failure as the canonicalisers themselves, one level up.
+      #
+      # Here the pin is checked against the source of truth, which sounds circular and is not:
+      # it asserts that interop/vectors/vectors.json has not been edited away from the digest
+      # that bridle and hdicr are pinned to. Change the vectors here without updating the pin
+      # in all three repositories and this repository goes red first.
+      - name: ADR-014 vector pin — the copies in all three repos are one file (gate)
+        run: node scripts/check-vectors-pinned.mjs interop/vectors/vectors.json
       - name: Verifier selftest (gate)
         run: npm --prefix reference/verifier run selftest
 
