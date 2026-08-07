@@ -28,6 +28,29 @@
       "description": "SHA-256 of the committed output.",
       "pattern": "^sha256:[0-9a-f]{64}$"
     },
+    "use": {
+      "type": "object",
+      "description": "The use this attestation actually attests: what was checked at the moment of the act, not what the grant permits in general. Optional so objects written before this field existed stay valid, but SHOULD be present — an attestation that does not say what use it attests records only that something happened, which is a decoration rather than evidence (Bridle defect B6). A verifier comparing this against the grant's scope is what makes the attestation checkable offline.",
+      "additionalProperties": false,
+      "properties": {
+        "purpose": { "type": "string", "description": "The single purpose checked, drawn from the grant's scope.purposes." },
+        "territory": { "type": "string", "description": "ISO 3166-1 alpha-2 or 'GLOBAL'." },
+        "spend": {
+          "type": "object",
+          "description": "What this act drew against the grant's lease, in the lease's own unit.",
+          "additionalProperties": false,
+          "required": ["amount", "unit"],
+          "properties": {
+            "amount": { "type": "number", "minimum": 0 },
+            "unit": { "type": "string", "description": "MUST match the grant's lease.unit; a spend in a different unit is not comparable to the cap." }
+          }
+        }
+      }
+    },
+    "decision_record_ref": {
+      "type": "string",
+      "description": "record_id of the Decision Record this attestation was emitted under. Optional for backwards compatibility, but without it the attestation and the decision that authorised it cannot be tied together by a third party — which is the join a stranger needs to verify the act offline."
+    },
     "generator": {
       "type": "object",
       "description": "What produced the output. The operator governs, never generates — generation is outsourced to a third-party generation provider via an implementer's adapter.",
